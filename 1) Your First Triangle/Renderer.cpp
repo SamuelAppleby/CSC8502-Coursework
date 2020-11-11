@@ -2,6 +2,7 @@
 
 Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	triangle = Mesh::GenerateTriangle();
+
 	basicShader = new Shader("basicVertex.glsl", "colourFragment.glsl");
 	if (!basicShader->LoadSuccess()) {
 		return;

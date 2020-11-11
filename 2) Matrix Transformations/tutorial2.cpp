@@ -1,8 +1,8 @@
-#include "../nclgl/window.h"
+#include "../nclgl/Window.h"
 #include "Renderer.h"
 
 int main() {
-	Window w("Vertex Transformation!", 800, 600, false);
+	Window w("Vertex Transformation!", 1920, 1080, true);
 	if (!w.HasInitialised()) {
 		return -1;
 	}
@@ -14,6 +14,7 @@ int main() {
 
 	float scale = 100.0f;
 	float rotation = 0.0f;
+	float fov = 45.0f;
 	Vector3 position(0, 0, -1500.0f);
 
 	while (w.UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)) {
@@ -27,6 +28,9 @@ int main() {
 
 		if (Window::GetKeyboard()->KeyDown(KEYBOARD_LEFT))  ++rotation;
 		if (Window::GetKeyboard()->KeyDown(KEYBOARD_RIGHT)) --rotation;
+
+		if (Window::GetKeyboard()->KeyDown(KEYBOARD_UP))  ++fov;
+		if (Window::GetKeyboard()->KeyDown(KEYBOARD_DOWN)) --fov;
 
 		if (Window::GetKeyboard()->KeyDown(KEYBOARD_K))
 			position.y -= 1.0f;
@@ -46,6 +50,8 @@ int main() {
 		renderer.SetRotation(rotation);
 		renderer.SetScale(scale);
 		renderer.SetPosition(position);
+		renderer.SetFov(fov);
+		renderer.UpdateScene(w.GetTimer()->GetTimeDeltaSeconds());
 		renderer.RenderScene();
 		renderer.SwapBuffers();
 	}
