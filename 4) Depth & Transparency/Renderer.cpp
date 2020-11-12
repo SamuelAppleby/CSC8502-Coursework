@@ -68,17 +68,17 @@ void Renderer::ToggleAlphaBlend() {
 void Renderer::ToggleDepthMode() {
 	depthMode = (depthMode + 1) % 8;
 	switch (depthMode) {
-	case (0): glDepthFunc(GL_NEVER); break;
-	case (1): glDepthFunc(GL_LESS); break;
-	case (2): glDepthFunc(GL_LEQUAL); break;
-	case (3): glDepthFunc(GL_EQUAL); break;
-	case (4): glDepthFunc(GL_GREATER); break;
-	case (5): glDepthFunc(GL_GEQUAL); break;
-	case (6): glDepthFunc(GL_NOTEQUAL); break;
-	case (7): glDepthFunc(GL_ALWAYS); break;
+	case (0): glDepthFunc(GL_LESS); break;
+	case (1): glDepthFunc(GL_LEQUAL); break;
+	case (2): glDepthFunc(GL_GEQUAL); break;
+	case (3): glDepthFunc(GL_GREATER); break;
+	case (4): glDepthFunc(GL_EQUAL); break;
+	case (5): glDepthFunc(GL_NOTEQUAL); break;
+	case (6): glDepthFunc(GL_ALWAYS); break;
+	case (7): glDepthFunc(GL_NEVER); break;
 	};
 }
 void Renderer::ToggleDepthMask() {
 	depthMask = !depthMask;
-	depthMask ? glDepthMask(true) : glDepthMask(false);
+	depthMask ? glDepthMask(GL_TRUE) : glDepthMask(GL_TRUE);
 }
