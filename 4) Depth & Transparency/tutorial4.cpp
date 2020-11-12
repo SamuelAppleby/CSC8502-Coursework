@@ -25,7 +25,12 @@ int main()	{
 		if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_4)) {
 			renderer.ToggleBlendMode();
 		}
-
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_5)) {
+			renderer.ToggleDepthMode();
+		}
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_6)) {
+			renderer.ToggleDepthMask();
+		}
 		if(Window::GetKeyboard()->KeyDown(KEYBOARD_UP)) {
 			renderer.MoveObject(0.1f);
 		}

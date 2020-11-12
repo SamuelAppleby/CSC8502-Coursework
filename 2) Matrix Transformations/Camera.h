@@ -26,6 +26,7 @@ public:
 protected:
 	float yaw;
 	float pitch;
+	float roll = 0;
 	Vector3 position; // Set to 0 ,0 ,0 by Vector3 constructor ;)
 };
 
