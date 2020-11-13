@@ -42,20 +42,11 @@ void Renderer::RenderScene() {
 		meshes[i]->Draw();
 	}
 }
-void Renderer::ToggleObject() {
-	modifyObject = !modifyObject;
-}
 void Renderer::MoveObject(float by) {
 	positions[(int)modifyObject].z += by;
 }
-void Renderer::ToggleBlendMode() {
-	blendMode = (blendMode + 1) % 4;
-	switch (blendMode) {
-	case (0): glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); break;
-	case (1): glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR); break;
-	case (2): glBlendFunc(GL_ONE, GL_ZERO); break;
-	case (3): glBlendFunc(GL_SRC_ALPHA, GL_ONE); break;
-	};
+void Renderer::ToggleObject() {
+	modifyObject = !modifyObject;
 }
 void Renderer::ToggleDepth() {
 	usingDepth = !usingDepth;
@@ -64,6 +55,18 @@ void Renderer::ToggleDepth() {
 void Renderer::ToggleAlphaBlend() {
 	usingAlpha = !usingAlpha;
 	usingAlpha ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
+	if(usingAlpha)
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+void Renderer::ToggleBlendMode() {
+	blendMode = (blendMode + 1) % 4;
+	std::cout << blendMode;
+	switch (blendMode) {
+	case (0): glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); break;
+	case (1): glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR); break;
+	case (2): glBlendFunc(GL_ONE, GL_ZERO); break;
+	case (3): glBlendFunc(GL_SRC_ALPHA, GL_ONE); break;
+	};
 }
 void Renderer::ToggleDepthMode() {
 	depthMode = (depthMode + 1) % 8;
@@ -80,5 +83,5 @@ void Renderer::ToggleDepthMode() {
 }
 void Renderer::ToggleDepthMask() {
 	depthMask = !depthMask;
-	depthMask ? glDepthMask(GL_TRUE) : glDepthMask(GL_TRUE);
+	depthMask ? glDepthMask(GL_TRUE) : glDepthMask(GL_FALSE);
 }

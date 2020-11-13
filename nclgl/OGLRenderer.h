@@ -58,6 +58,11 @@ public:
 	bool			HasInitialised() const;	
 	
 protected:
+	void SetTextureRepeating(GLuint target, bool state);
+	void SetBilinearFiltering(GLuint target, bool state);
+	void SetTrilinearFiltering(GLuint target, bool state);
+	void SetAnisotropicFiltering(GLuint target, bool state, GLfloat value);
+
 	virtual void	Resize(int x, int y);	
 	void			UpdateShaderMatrices();
 	void			BindShader(Shader*s);

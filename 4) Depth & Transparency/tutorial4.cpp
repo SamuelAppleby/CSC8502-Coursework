@@ -20,16 +20,16 @@ int main()	{
 			renderer.ToggleDepth();
 		}
 		if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_3)) {
-			renderer.ToggleAlphaBlend();
+			renderer.ToggleDepthMask();
 		}
 		if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_4)) {
-			renderer.ToggleBlendMode();
-		}
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_5)) {
 			renderer.ToggleDepthMode();
 		}
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_5)) {
+			renderer.ToggleAlphaBlend();
+		}
 		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_6)) {
-			renderer.ToggleDepthMask();
+			renderer.ToggleBlendMode();
 		}
 		if(Window::GetKeyboard()->KeyDown(KEYBOARD_UP)) {
 			renderer.MoveObject(0.1f);

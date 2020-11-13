@@ -20,6 +20,6 @@ protected:
 
 	bool biFiltering;
 	bool triFiltering;
-	bool anistropicFiltering;
+	bool anisotropicFiltering;
 	bool repeating;
 };

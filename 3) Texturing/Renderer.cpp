@@ -14,7 +14,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	}
 	biFiltering = false;
 	triFiltering = false;
-	anistropicFiltering = false;
+	anisotropicFiltering = false;
 	repeating = false;
 	init = true;
 }
@@ -39,28 +39,29 @@ void Renderer::UpdateTextureMatrix(float value) {
 	textureMatrix = pop * rotation * push;
 }
 void Renderer::ToggleBilinearFiltering() {
+	if (triFiltering)
+		ToggleTrilinearFiltering();
 	biFiltering = !biFiltering;
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, biFiltering ? GL_LINEAR : GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, biFiltering ? GL_LINEAR : GL_NEAREST);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	SetBilinearFiltering(texture, biFiltering);
+	biFiltering ? std::cout << "BiLinear Filtering ON!" << std::endl : std::cout << "BiLinear Filtering OFF!" << std::endl;
 }
 void Renderer::ToggleTrilinearFiltering() {
+	if (biFiltering)
+		ToggleBilinearFiltering();
 	triFiltering = !triFiltering;
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, triFiltering ? GL_LINEAR_MIPMAP_NEAREST : GL_NEAREST);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	SetTrilinearFiltering(texture, triFiltering);
+	triFiltering ? std::cout << "Trilinear Filtering ON!" << std::endl : std::cout << "Trilinear Filtering OFF!" << std::endl;
 }
 void Renderer::ToggleAnisotropicFiltering() {
-	anistropicFiltering = !anistropicFiltering;
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, anistropicFiltering ? 34047.0f : 1.0f);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	anisotropicFiltering = !anisotropicFiltering;
+	GLfloat value, max_anisotropy = 16.0f;
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &value);
+	value = (value > max_anisotropy) ? max_anisotropy : value;
+	SetAnisotropicFiltering(texture, anisotropicFiltering, value);
+	anisotropicFiltering ? std::cout << "AnistropicFiltering Filtering ON: " << value << "x"
+		<< std::endl : std::cout << "AnistropicFiltering Filtering OFF!" << std::endl;
 }
 void Renderer::ToggleRepeating() {
 	repeating = !repeating;
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeating ? GL_REPEAT : GL_CLAMP);	//x axis
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeating ? GL_REPEAT : GL_CLAMP);	// y axis
-	glBindTexture(GL_TEXTURE_2D, 0);
+	SetTextureRepeating(texture, repeating);
 }

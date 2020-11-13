@@ -3,12 +3,12 @@
 #include <string>
 using std::string;
 int main() {	
-	Window w("Scissors and Stencils!", 1280, 720,false);	//This is all boring win32 window creation stuff!
+	Window w("Scissors and Stencils!", 1280, 720,false);	
 	if(!w.HasInitialised()) {
 		return -1;
 	}
 	
-	Renderer renderer(w);	//This handles all the boring OGL 3.2 initialisation stuff, and sets up our tutorial!
+	Renderer renderer(w);	
 	if(!renderer.HasInitialised()) {
 		return -1;
 	}

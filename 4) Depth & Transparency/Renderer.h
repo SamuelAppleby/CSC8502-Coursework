@@ -5,13 +5,13 @@ public:
 	Renderer(Window & parent);
 	~Renderer(void);
 	void RenderScene() override;
+	void MoveObject(float by);
 	void ToggleObject();
 	void ToggleDepth();
+	void ToggleDepthMask();
+	void ToggleDepthMode();
 	void ToggleAlphaBlend();
 	void ToggleBlendMode();
-	void MoveObject(float by);
-	void ToggleDepthMode();
-	void ToggleDepthMask();
 	
 protected:
 	GLuint textures[2];
