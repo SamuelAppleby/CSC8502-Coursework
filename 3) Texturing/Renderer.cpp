@@ -1,7 +1,7 @@
 #include"Renderer.h"
 Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	triangle = Mesh::GenerateTriangle();
-	// 	texture = SOIL_load_OGL_texture(TEXTUREDIR "brick.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0);
+	// 	texture = SOIL_load_OGL_texture(TEXTUREDIR "brick.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0);	// No MipMap
 	texture = SOIL_load_OGL_texture(TEXTUREDIR "brick.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
 
 	if (!texture) {

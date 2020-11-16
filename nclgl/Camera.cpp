@@ -12,10 +12,10 @@ void Camera::UpdateCamera(float dt) {
 	if (yaw > 360.0f) {
 		yaw -= 360.0f;
 	}
-	if (Window::GetKeyboard()->KeyDown(KEYBOARD_X)) {
+	if (Window::GetKeyboard()->KeyDown(KEYBOARD_Z)) {
 		roll++;
 	}
-	if (Window::GetKeyboard()->KeyDown(KEYBOARD_C)) {
+	if (Window::GetKeyboard()->KeyDown(KEYBOARD_X)) {
 		roll--;
 	}
 	if (roll < 0) {
@@ -40,16 +40,16 @@ void Camera::UpdateCamera(float dt) {
 	if (Window::GetKeyboard()->KeyDown(KEYBOARD_D)) {
 		position += right * velocity;
 	}
-	if (Window::GetKeyboard()->KeyDown(KEYBOARD_SHIFT)) {
+	if (Window::GetKeyboard()->KeyDown(KEYBOARD_SPACE)) {
 		position.y += velocity;
 	}
-	if (Window::GetKeyboard()->KeyDown(KEYBOARD_SPACE)) {
+	if (Window::GetKeyboard()->KeyDown(KEYBOARD_SHIFT)) {
 		position.y -= velocity;
 	}
 }
 Matrix4 Camera::BuildViewMatrix() {
-	return Matrix4::Rotation(-pitch, Vector3(1, 0, 0)) * Matrix4::Rotation(-yaw, Vector3(0, 1, 0)) * Matrix4::Rotation(-roll, Vector3(0, 0, 1))
-		* Matrix4::Translation(-position);
+	return Matrix4::Rotation(-pitch, Vector3(1, 0, 0)) * Matrix4::Rotation(-yaw, Vector3(0, 1, 0)) 
+		* Matrix4::Rotation(-roll, Vector3(0, 0, 1)) * Matrix4::Translation(-position);
 };
 
 

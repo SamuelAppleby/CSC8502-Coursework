@@ -1,6 +1,6 @@
 #pragma once
 #include "../nclgl/OGLRenderer.h"
-#include "Camera.h"
+#include "../nclgl/Camera.h"
 class Renderer : public OGLRenderer {
 public:
 	Renderer(Window & parent);

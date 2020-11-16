@@ -11,7 +11,6 @@ out Vertex {
 } OUT;
 
 void main ( void ) {
-	mat4 mvp = projMatrix * viewMatrix * modelMatrix;
-	gl_Position = mvp * vec4 ( position , 1.0);
+	gl_Position = projMatrix * viewMatrix * modelMatrix * vec4 (position , 1.0);
 	OUT.colour = colour;
 }

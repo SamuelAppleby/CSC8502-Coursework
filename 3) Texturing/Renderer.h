@@ -16,7 +16,6 @@ protected:
 	Shader * shader;
 	Mesh * triangle;
 	GLuint texture;
-	GLuint texture1;
 
 	bool biFiltering;
 	bool triFiltering;
