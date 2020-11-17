@@ -2,7 +2,7 @@
 #include "Renderer.h"
 
 int main() {
-	Window w("Vertex Transformation!", 1920, 1080, true);
+	Window w("Vertex Transformation!", 1280, 720, false);
 	if (!w.HasInitialised()) {
 		return -1;
 	}

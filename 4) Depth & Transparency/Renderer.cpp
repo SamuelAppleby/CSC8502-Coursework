@@ -3,7 +3,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	meshes[0] = Mesh::GenerateQuad();
 	meshes[1] = Mesh::GenerateTriangle();
 
-	textures[0] = SOIL_load_OGL_texture(TEXTUREDIR "brick.tga ", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0);
+	textures[0] = SOIL_load_OGL_texture(TEXTUREDIR "brick.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0);
 	textures[1] = SOIL_load_OGL_texture(TEXTUREDIR "stainedglass.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0);
 	if (!textures[0] || !textures[1]) {
 	return;

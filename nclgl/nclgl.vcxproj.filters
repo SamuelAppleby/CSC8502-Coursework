@@ -37,8 +37,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="Frustum.cpp" />
-    <ClCompile Include="BoundingVolume.cpp" />
-    <ClCompile Include="BoundingSphere.cpp" />
+    <ClCompile Include="HeightMap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />
@@ -89,6 +88,8 @@
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="BoundingVolume.h" />
     <ClInclude Include="BoundingSphere.h" />
+    <ClInclude Include="HeightMap.h" />
+    <ClInclude Include="BoundingAABB.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="GLAD">

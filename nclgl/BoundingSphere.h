@@ -9,6 +9,6 @@ public:
 	}
 	float getRadius() { return radius; }
 	void setRadius(float radius) { this->radius = radius; }
-	bool isAccessible() { return false; }
+	void print() { std::cout << "Bounding Sphere: " << radius << std::endl; }
 };
 

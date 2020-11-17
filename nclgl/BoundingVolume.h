@@ -1,6 +1,9 @@
 #pragma once
+#include <iostream>
 class BoundingVolume {
 public:
-	virtual bool isAccessible() { return true; }
+	virtual void print() {
+		std::cout << "Parent Volume" << std::endl;
+	};
 };
 
