@@ -8,11 +8,12 @@ public:
 	~Renderer(void);
 	void RenderScene() override;
 	void UpdateScene(float dt) override;
-	
+	void DrawScene();
 protected:
 	Mesh * heightMap;
 	Mesh* cube;
 	Shader * shader;
-	Camera * camera;
+	vector<Camera*> cameras;
+
 	GLuint terrainTex;
 };

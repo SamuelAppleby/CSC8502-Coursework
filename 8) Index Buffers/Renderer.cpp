@@ -3,7 +3,8 @@
 #include "../nclgl/HeightMap.h"
 Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	heightMap = new HeightMap(TEXTUREDIR "noise.png");
-	camera = new Camera(-40, 270, Vector3(-2100, 3300, 2000));
+	cameras.push_back(new Camera(-40, 270, 0, Vector3(-2100, 3300, 2000)));
+	cameras.push_back(new Camera(-40, 270, -45, Vector3(1000, 3300, 2000)));
 	shader = new Shader("HeightVertex.glsl", "HeightFragment.glsl");
 	if (!shader->LoadSuccess()) {
 		return;
@@ -20,16 +21,30 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	init = true;
 }
 Renderer ::~Renderer(void) {
+	for (auto camera : cameras)
+		delete camera;
+	cameras.clear();
 	delete heightMap;
-	delete camera;
 	delete shader;
 }
 void Renderer::UpdateScene(float dt) {
-	camera->UpdateCamera(dt);
-	viewMatrix = camera->BuildViewMatrix();
+	for (auto camera : cameras)
+		camera->UpdateCamera(dt);
 }
 void Renderer::RenderScene() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glViewport(0, 0, width / 2, height);
+	projMatrix = Matrix4::Perspective(1.0f, 10000.0f, (float)width / 2 / (float)height, 45.0f);
+	viewMatrix = cameras.at(0)->BuildViewMatrix();
+	DrawScene();
+
+	glViewport(width / 2, 0, width / 2, height);
+	projMatrix = Matrix4::Perspective(1.0f, 10000.0f, (float)width / 2 / (float)height, 45.0f);
+	viewMatrix = cameras.at(1)->BuildViewMatrix();
+	DrawScene();
+}
+void Renderer::DrawScene() {
 	BindShader(shader);
 	UpdateShaderMatrices();
 	glUniform1i(glGetUniformLocation(shader->GetProgram(), "diffuseTex"), 0);

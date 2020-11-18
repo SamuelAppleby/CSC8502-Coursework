@@ -2,7 +2,7 @@
 #include "../nclgl/CubeRobot.h"
 #include <algorithm> // For std :: sort ...
 Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
-	camera = new Camera(0.0f, 0.0f, Vector3(0, 100, 750.0f));
+	camera = new Camera(0.0f, 0.0f, 0.0f, Vector3(0, 100, 750.0f));
 	quad = Mesh::GenerateQuad();
 	cube = Mesh::LoadFromMeshFile("OffsetCubeY.msh");
 	shader = new Shader("SceneVertex.glsl", "SceneFragment.glsl");

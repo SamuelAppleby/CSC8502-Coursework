@@ -7,7 +7,8 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	glEnable(GL_CULL_FACE);
 
 	projMatrix = Matrix4::Perspective(1.0f, 10000.0f, (float)width / (float)height, 45.0f);
-	camera = new Camera(-3, 0.0f, Vector3(0, 1.4f, 4.0f));
+	cameras.push_back(new Camera(-3.0f, 0.0f, 0.0f, Vector3(0, 1.4f, 4.0f)));
+	cameras.push_back(new Camera(-3.0f, 90.0f, 0.0f, Vector3(4, 1.4f, 0.0f)));
 
 	shader = new Shader("SkinningVertex.glsl", "texturedFragment.glsl");
 	
@@ -31,15 +32,17 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	init = true;
 }
 Renderer ::~Renderer(void) {
-	delete camera;
+	for (auto camera : cameras)
+		delete camera;
+	cameras.clear();
 	delete mesh;
 	delete anim;
 	delete material;
 	delete shader;
 }
 void Renderer::UpdateScene(float dt) {
-	camera->UpdateCamera(dt);
-	viewMatrix = camera->BuildViewMatrix();
+	for (auto camera : cameras)
+		camera->UpdateCamera(dt);
 	frameTime -= dt;
 	while (frameTime < 0.0f) {
 		currentFrame = (currentFrame + 1) % anim->GetFrameCount();
@@ -48,16 +51,26 @@ void Renderer::UpdateScene(float dt) {
 }
 void Renderer::RenderScene() {
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	
+	glViewport(0, 0, width / 2, height);
+	projMatrix = Matrix4::Perspective(1.0f, 10000.0f, (float)width / 2 / (float)height, 45.0f);
+	viewMatrix = cameras.at(0)->BuildViewMatrix();
+	DrawScene();
+
+	glViewport(width / 2, 0, width / 2, height);
+	projMatrix = Matrix4::Perspective(1.0f, 10000.0f, (float)width / 2 / (float)height, 45.0f);
+	viewMatrix = cameras.at(1)->BuildViewMatrix();
+	DrawScene();
+}
+void Renderer::DrawScene() {
 	BindShader(shader);
-	glUniform1i(glGetUniformLocation(shader->GetProgram(),"diffuseTex"), 0);
+	glUniform1i(glGetUniformLocation(shader->GetProgram(), "diffuseTex"), 0);
 
 	UpdateShaderMatrices();
 
 	vector <Matrix4> frameMatrices;
 
-	const Matrix4 * invBindPose = mesh->GetInverseBindPose();
-	const Matrix4 * frameData = anim->GetJointData(currentFrame);
+	const Matrix4* invBindPose = mesh->GetInverseBindPose();
+	const Matrix4* frameData = anim->GetJointData(currentFrame);
 
 	for (unsigned int i = 0; i < mesh->GetJointCount(); ++i) {
 		frameMatrices.emplace_back(frameData[i] * invBindPose[i]);

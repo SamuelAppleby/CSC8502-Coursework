@@ -12,9 +12,9 @@ public:
 	
 	void RenderScene() override;
 	void UpdateScene(float dt) override;
-	
+	void DrawScene();
 protected:
-	Camera * camera;
+	vector<Camera*> cameras;
 	Mesh * mesh;
 	Shader * shader;
 	MeshAnimation * anim;

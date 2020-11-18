@@ -7,10 +7,13 @@ public:
 	Camera(void) {
 		yaw = 0.0f;
 		pitch = 0.0f;
+		roll = 0.0f;
+		position = Vector3(0, 0, 0);
 	};
-	Camera(float pitch, float yaw, Vector3 position) {
+	Camera(float pitch, float yaw, float roll, Vector3 position) {
 		this->pitch = pitch;
 		this->yaw = yaw;
+		this->roll = roll;
 		this->position = position;
 	}
 	~Camera(void) {};
@@ -26,7 +29,7 @@ public:
 protected:
 	float yaw;
 	float pitch;
-	float roll = 0;
+	float roll;
 	Vector3 position; // Set to 0 ,0 ,0 by Vector3 constructor ;)
 };
 
