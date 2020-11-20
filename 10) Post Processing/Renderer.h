@@ -8,6 +8,7 @@ public:
 	~Renderer(void);
 	void RenderScene() override;
 	void UpdateScene(float dt) override;
+	void SwitchCamera(int newCam);
 protected:
 	void PresentScene();
 	void DrawPostProcess();
@@ -26,4 +27,5 @@ protected:
 	GLuint bufferColourTex[2];
 	GLuint bufferDepthTex;
 	bool firstViewpoint;
+	int currentCamera;
 };

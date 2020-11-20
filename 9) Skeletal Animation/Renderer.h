@@ -13,8 +13,12 @@ public:
 	void RenderScene() override;
 	void UpdateScene(float dt) override;
 	void DrawScene();
+	void SwitchCamera(int newCam);
 protected:
 	vector<Camera*> cameras;
+	int currentCamera;
+	bool onRails;
+	bool splitScreen;
 	Mesh * mesh;
 	Shader * shader;
 	MeshAnimation * anim;

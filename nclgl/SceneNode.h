@@ -6,6 +6,7 @@
 #include <vector>
 #include "BoundingVolume.h"
 #include "BoundingSphere.h"
+#include "BoundingAABB.h"
 class SceneNode {
 public:
 	SceneNode(Mesh* m = NULL, Vector4 colour = Vector4(1, 1, 1, 1));
@@ -33,6 +34,7 @@ public:
 	static bool CompareByCameraDistance(SceneNode* a, SceneNode* b) {
 		return (a->distanceFromCamera < b->distanceFromCamera) ? true : false;
 	}
+	bool considerChilren() { return considerChildren; }
 	virtual void Draw(const OGLRenderer& r);
 	virtual void Update(float dt);
 
@@ -47,4 +49,5 @@ protected:
 	float distanceFromCamera;
 	BoundingVolume* boundingVolume;
 	GLuint texture;
+	bool considerChildren;
 };

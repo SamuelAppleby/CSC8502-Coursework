@@ -7,6 +7,7 @@ SceneNode::SceneNode(Mesh* mesh, Vector4 colour) {
 	distanceFromCamera = 0.0f;
 	boundingVolume = new BoundingVolume;
 	texture = 0;
+	considerChildren = true;
 }
 SceneNode ::~SceneNode(void) {
 	for (unsigned int i = 0; i < children.size(); ++i) {

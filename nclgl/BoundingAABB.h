@@ -2,21 +2,17 @@
 #include"BoundingVolume.h"
 class BoundingAABB : public BoundingVolume {
 private:
-	float halfLength;
-	float halfWidth;
-	float halfDepth;
+	Vector3 min;
+	Vector3 max;
 public:
-	BoundingAABB(float halfLength, float halfWidth, float halfDepth) {
-		this->halfLength = halfLength;
-		this->halfWidth = halfWidth;
-		this->halfDepth = halfDepth;
+	BoundingAABB(Vector3 min, Vector3 max) {
+		this->min = min;
+		this->max = max;
 	}
-	float getHalfLength() { return halfLength; }
-	void setHalfLength(float halfLength) { this->halfLength = halfLength; }
-	float getHalfWidth() { return halfWidth; }
-	void setHalfWidth(float halfWidth) { this->halfWidth = halfWidth; }
-	float getHalfDepth() { return halfDepth; }
-	void setHalfDepth(float halfDepth) { this->halfDepth = halfDepth; }
-	void print() { std::cout << "Bounding AABB: " << halfLength << ", " << halfWidth << ", " << halfDepth << std::endl; }
+	Vector3 getMin() { return min; }
+	void setMin(Vector3 min) { this->min = min; }
+	Vector3 getMax() { return max; }
+	void setMax(Vector3 max) { this->max = max; }
+	void print() { std::cout << "Bounding AABB: " << min << ", " << max << std::endl; }
 };
 

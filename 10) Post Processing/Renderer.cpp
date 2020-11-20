@@ -47,6 +47,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glEnable(GL_DEPTH_TEST);
 	init = true;
+	currentCamera = 0;
 }
 Renderer ::~Renderer(void) {
 	for (auto camera : cameras)
@@ -62,8 +63,17 @@ Renderer ::~Renderer(void) {
 	glDeleteFramebuffers(1, &processFBO);
 }
 void Renderer::UpdateScene(float dt) {
-	for (auto camera : cameras)
-		camera->UpdateCamera(dt);
+	for (auto camera : cameras) {
+		if (camera->isEnabled()) {
+			camera->UpdateCamera(dt);
+		}
+	}
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_1)) {
+		SwitchCamera(0);
+	}
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_2)) {
+		SwitchCamera(1);
+	}
 }
 void Renderer::RenderScene() {
 	firstViewpoint = true;
@@ -135,4 +145,9 @@ void Renderer::PresentScene() {
 	glBindTexture(GL_TEXTURE_2D, bufferColourTex[0]);
 	glUniform1i(glGetUniformLocation(sceneShader->GetProgram(), "diffuseTex"), 0);
 	quad->Draw();
+}
+void Renderer::SwitchCamera(int newCam) {
+	cameras.at(currentCamera)->setEnabled(false);
+	cameras.at(newCam)->setEnabled(true);
+	currentCamera = newCam;
 }

@@ -13,12 +13,14 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	root = new SceneNode();
 	for (int i = 0; i < 5; ++i) {
 		SceneNode* s = new SceneNode();
+		Vector3 position(0, 100.0f, -300.0f + 100.0f + 100 * i);
 		s->SetColour(Vector4(1.0f, 1.0f, 1.0f, 0.5f));
-		s->SetTransform(Matrix4::Translation(Vector3(0, 100.0f, -300.0f + 100.0f + 100 * i)));
+		s->SetTransform(Matrix4::Translation(position));
 		s->SetModelScale(Vector3(100.0f, 100.0f, 100.0f));
-		s->setBoundingVolume(new BoundingSphere(100.0f));
 		s->SetMesh(quad);
 		s->SetTexture(texture);
+		s->setBoundingVolume(new BoundingAABB(Vector3(position.x - 100, position.y - 100, position.z + 1),
+			Vector3(position.x + 100, position.y + 100, position.z - 1)));
 		root->AddChild(s);
 	}
 	root->AddChild(new CubeRobot(cube));
@@ -52,6 +54,9 @@ void Renderer::BuildNodeLists(SceneNode* from) {
 		else {
 			nodeList.push_back(from);
 		}
+	}
+	else if (!from->considerChilren()) {
+		return;		// If a parent encompasses its children and fails the frustum
 	}
 	for (auto& i : from->getChildren()) {
 		BuildNodeLists(i);

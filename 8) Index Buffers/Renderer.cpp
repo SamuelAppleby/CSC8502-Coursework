@@ -5,7 +5,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	heightMap = new HeightMap(TEXTUREDIR "noise.png");
 	cameras.push_back(new Camera(-40, 270, 0, Vector3(-2100, 3300, 2000)));
 	cameras.push_back(new Camera(-40, 270, -45, Vector3(1000, 3300, 2000)));
-	shader = new Shader("HeightVertex.glsl", "HeightFragment.glsl");
+	shader = new Shader("ShadowVertex.glsl", "ShadowFragment.glsl");
 	if (!shader->LoadSuccess()) {
 		return;
 	}
@@ -19,6 +19,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	init = true;
+	currentCamera = 0;
 }
 Renderer ::~Renderer(void) {
 	for (auto camera : cameras)
@@ -28,8 +29,17 @@ Renderer ::~Renderer(void) {
 	delete shader;
 }
 void Renderer::UpdateScene(float dt) {
-	for (auto camera : cameras)
-		camera->UpdateCamera(dt);
+	for (auto& camera : cameras) {
+		if (camera->isEnabled()) {
+			camera->UpdateCamera(dt);
+		}
+	}
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_1)) {
+		SwitchCamera(0);
+	}
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_2)) {
+		SwitchCamera(1);
+	}
 }
 void Renderer::RenderScene() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -51,4 +61,10 @@ void Renderer::DrawScene() {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, terrainTex);
 	heightMap->Draw();
+}
+
+void Renderer::SwitchCamera(int newCam) {
+	cameras.at(currentCamera)->setEnabled(false);
+	cameras.at(newCam)->setEnabled(true);
+	currentCamera = newCam;
 }

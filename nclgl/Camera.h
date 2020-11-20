@@ -1,6 +1,6 @@
 #pragma once
-#include"../nclgl/Matrix4.h"
-#include"../nclgl/Vector3.h"
+#include"Matrix4.h"
+#include"Vector3.h"
 
 class Camera {
 public:
@@ -9,12 +9,16 @@ public:
 		pitch = 0.0f;
 		roll = 0.0f;
 		position = Vector3(0, 0, 0);
+		enabled = false;
+		velocity = 3.0f;
 	};
 	Camera(float pitch, float yaw, float roll, Vector3 position) {
 		this->pitch = pitch;
 		this->yaw = yaw;
 		this->roll = roll;
 		this->position = position;
+		enabled = false;
+		velocity = 3.0f;
 	}
 	~Camera(void) {};
 	void UpdateCamera(float dt = 1.0f);
@@ -25,11 +29,26 @@ public:
 	void SetYaw(float y) { yaw = y; }
 	float GetPitch() const { return pitch; }
 	void SetPitch(float p) { pitch = p; }
-
+	bool isEnabled() { return enabled; }
+	void setEnabled(bool enabled) { this->enabled = enabled; }
+	void MoveLeft(float dt);
+	void MoveRight(float dt);
+	void MoveForward(float dt);
+	void MoveBack(float dt);
+	void MoveUp(float dt);
+	void MoveDown(float dt);
+	void RollRight(float dt);
+	void RollLeft(float dt);
+	void LookLeft(float dt);
+	void LookRight(float dt);
+	void LookUp(float dt);
+	void LookDown(float dt);
 protected:
 	float yaw;
 	float pitch;
 	float roll;
+	bool enabled;
+	float velocity;
 	Vector3 position; // Set to 0 ,0 ,0 by Vector3 constructor ;)
 };
 

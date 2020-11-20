@@ -4,7 +4,14 @@
 bool Frustum::InsideFrustum(SceneNode& n) {
 	if (BoundingSphere* sphere = dynamic_cast<BoundingSphere*>(n.getBoundingVolume())) {
 		for (int p = 0; p < 6; ++p) {
-			if (!planes[p].SphereInPlane(n.GetWorldTransform().GetPositionVector(), sphere->getRadius())) {
+			if (!planes[p].SphereInPlane(n.GetWorldTransform().GetPositionVector(), sphere)) {
+				return false; // scenenode is outside this plane !
+			}
+		}
+	}
+	if (BoundingAABB* AABB = dynamic_cast<BoundingAABB*>(n.getBoundingVolume())) {
+		for (int p = 0; p < 6; ++p) {
+			if (!planes[p].AABBInPlane(n.GetWorldTransform().GetPositionVector(), AABB)) {
 				return false; // scenenode is outside this plane !
 			}
 		}

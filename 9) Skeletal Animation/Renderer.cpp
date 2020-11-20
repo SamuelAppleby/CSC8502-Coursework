@@ -30,6 +30,9 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	currentFrame = 0;
 	frameTime = 0.0f;
 	init = true;
+	currentCamera = 0;
+	onRails = false;
+	splitScreen = false;
 }
 Renderer ::~Renderer(void) {
 	for (auto camera : cameras)
@@ -41,8 +44,37 @@ Renderer ::~Renderer(void) {
 	delete shader;
 }
 void Renderer::UpdateScene(float dt) {
-	for (auto camera : cameras)
-		camera->UpdateCamera(dt);
+	if (!onRails) {
+		for (auto camera : cameras) {
+			if (camera->isEnabled()) {
+				camera->UpdateCamera(dt);
+			}
+		}
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_1)) {
+			SwitchCamera(0);
+		}
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_2)) {
+			SwitchCamera(1);
+		}
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_3)) {
+			splitScreen = !splitScreen;
+		}
+	}
+	else {
+		for (auto& camera : cameras) {
+			camera->MoveRight(dt);
+			camera->LookLeft(dt * 15);
+		}
+	}
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_R)) {
+		while (!cameras.empty()) {
+			delete cameras.back();
+			cameras.pop_back();
+		}
+		cameras.push_back(new Camera(-3.0f, 0.0f, 0.0f, Vector3(0, 1.4f, 4.0f)));
+		cameras.push_back(new Camera(-3.0f, 90.0f, 0.0f, Vector3(4, 1.4f, 0.0f)));
+		onRails = !onRails;
+	}
 	frameTime -= dt;
 	while (frameTime < 0.0f) {
 		currentFrame = (currentFrame + 1) % anim->GetFrameCount();
@@ -50,16 +82,25 @@ void Renderer::UpdateScene(float dt) {
 	}
 }
 void Renderer::RenderScene() {
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	glViewport(0, 0, width / 2, height);
-	projMatrix = Matrix4::Perspective(1.0f, 10000.0f, (float)width / 2 / (float)height, 45.0f);
-	viewMatrix = cameras.at(0)->BuildViewMatrix();
-	DrawScene();
+	if (splitScreen) {
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+		glViewport(0, 0, width / 2, height);
+		projMatrix = Matrix4::Perspective(1.0f, 10000.0f, (float)width / 2 / (float)height, 45.0f);
+		viewMatrix = cameras.at(0)->BuildViewMatrix();
+		DrawScene();
 
-	glViewport(width / 2, 0, width / 2, height);
-	projMatrix = Matrix4::Perspective(1.0f, 10000.0f, (float)width / 2 / (float)height, 45.0f);
-	viewMatrix = cameras.at(1)->BuildViewMatrix();
-	DrawScene();
+		glViewport(width / 2, 0, width / 2, height);
+		projMatrix = Matrix4::Perspective(1.0f, 10000.0f, (float)width / 2 / (float)height, 45.0f);
+		viewMatrix = cameras.at(1)->BuildViewMatrix();
+		DrawScene();
+	}
+	else {
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+		glViewport(0, 0, width, height);
+		projMatrix = Matrix4::Perspective(1.0f, 10000.0f, (float)width / (float)height, 45.0f);
+		viewMatrix = cameras.at(0)->BuildViewMatrix();
+		DrawScene();
+	}
 }
 void Renderer::DrawScene() {
 	BindShader(shader);
@@ -83,4 +124,9 @@ void Renderer::DrawScene() {
 		glBindTexture(GL_TEXTURE_2D, matTextures[i]);
 		mesh->DrawSubMesh(i);
 	}
+}
+void Renderer::SwitchCamera(int newCam) {
+	cameras.at(currentCamera)->setEnabled(false);
+	cameras.at(newCam)->setEnabled(true);
+	currentCamera = newCam;
 }
