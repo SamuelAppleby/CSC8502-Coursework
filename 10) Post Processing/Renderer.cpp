@@ -76,23 +76,21 @@ void Renderer::UpdateScene(float dt) {
 	}
 }
 void Renderer::RenderScene() {
-	firstViewpoint = true;
 	glViewport(0, 0, width, height);
 	projMatrix = Matrix4::Perspective(1.0f, 10000.0f, (float)width / 2 / (float)height, 45.0f);
 	viewMatrix = cameras.at(0)->BuildViewMatrix();
 	DrawScene();
 	DrawPostProcess();
 	glViewport(0, 0, width / 2, height);
-	PresentScene();
+	PresentScene(true);
 
-	firstViewpoint = false;
 	glViewport(0, 0, width, height);
 	projMatrix = Matrix4::Perspective(1.0f, 10000.0f, (float)width / 2 / (float)height, 45.0f);
 	viewMatrix = cameras.at(1)->BuildViewMatrix();
 	DrawScene();
 	DrawPostProcess();
 	glViewport(width / 2, 0, width / 2, height);
-	PresentScene();
+	PresentScene(false);
 }
 void Renderer::DrawScene() {
 	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
@@ -132,9 +130,9 @@ void Renderer::DrawPostProcess() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glEnable(GL_DEPTH_TEST);
 }
-void Renderer::PresentScene() {
+void Renderer::PresentScene(bool clear) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	if (firstViewpoint) 
+	if (clear) 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	BindShader(sceneShader);
 	modelMatrix.ToIdentity();

@@ -1,10 +1,11 @@
 #include "Renderer.h"
-#include "../nclgl/camera.h"
-#include "../nclgl/HeightMap.h"
 Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	heightMap = new HeightMap(TEXTUREDIR "noise.png");
-	cameras.push_back(new Camera(-40, 270, 0, Vector3(-2100, 3300, 2000)));
-	cameras.push_back(new Camera(-40, 270, -45, Vector3(1000, 3300, 2000)));
+	cameras.push_back(new Camera(-40, 270, 0, Vector3()));
+	cameras.push_back(new Camera(-40, 270, 0, Vector3()));
+	Vector3 dimensions = heightMap->GetHeightmapSize();
+	cameras.at(0)->SetPosition(dimensions * Vector3(0.5, 2, 0.5));
+	cameras.at(1)->SetPosition(dimensions * Vector3(0.5, 10, 0.5));
 	shader = new Shader("ShadowVertex.glsl", "ShadowFragment.glsl");
 	if (!shader->LoadSuccess()) {
 		return;

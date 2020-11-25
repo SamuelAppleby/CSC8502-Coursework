@@ -1,14 +1,6 @@
-#version 150 core
-uniform sampler2D diffuseTex;
-
-in Vertex {
-	vec2 texCoord;
-	vec4 colour;
-} IN;
-
+#version 330 core
 out vec4 fragColour;
 
 void main (void) {
-	fragColour = texture(diffuseTex, IN.texCoord) * ((IN.colour * 0.5) + 0.5);
-}
-
+	fragColour = vec4(1.0);
+}

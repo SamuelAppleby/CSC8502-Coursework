@@ -90,6 +90,10 @@
     <ClInclude Include="BoundingSphere.h" />
     <ClInclude Include="HeightMap.h" />
     <ClInclude Include="BoundingAABB.h" />
+    <ClInclude Include="PointLight.h" />
+    <ClInclude Include="DirectionalLight.h" />
+    <ClInclude Include="Light.h" />
+    <ClInclude Include="SpotLight.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="GLAD">

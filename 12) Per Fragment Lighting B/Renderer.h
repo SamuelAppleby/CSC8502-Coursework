@@ -1,23 +1,23 @@
 #pragma once
 #include "../nclgl/OGLRenderer.h"
-#include "../nclgl/camera.h"
-#include "../nclgl/heightmap.h"
+#include "../nclgl/Camera.h"
+#include "../nclgl/HeightMap.h"
 
-class Mesh;
+class HeightMap;
 class Camera;
+class Light; // Predeclare our new class type ...
+class Shader;
 class Renderer : public OGLRenderer {
 public:
-	Renderer(Window & parent);
+	Renderer(Window& parent);
 	~Renderer(void);
 	void RenderScene() override;
 	void UpdateScene(float dt) override;
-	void DrawScene();
-	void SwitchCamera(int newCam);
 protected:
 	HeightMap* heightMap;
-	Mesh* cube;
 	Shader* shader;
-	vector<Camera*> cameras;
-	int currentCamera;
-	GLuint terrainTex;
+	Camera* camera;
+	Light* light; 
+	GLuint texture;
+	GLuint bumpmap;
 };

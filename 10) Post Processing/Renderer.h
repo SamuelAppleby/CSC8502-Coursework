@@ -10,7 +10,7 @@ public:
 	void UpdateScene(float dt) override;
 	void SwitchCamera(int newCam);
 protected:
-	void PresentScene();
+	void PresentScene(bool clear);
 	void DrawPostProcess();
 	void DrawScene();
 	
@@ -26,6 +26,5 @@ protected:
 	GLuint processFBO;
 	GLuint bufferColourTex[2];
 	GLuint bufferDepthTex;
-	bool firstViewpoint;
 	int currentCamera;
 };

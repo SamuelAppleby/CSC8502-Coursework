@@ -52,8 +52,9 @@ public:
 	void DrawSubMesh(int i);
 	static Mesh* GenerateTriangle();
 	static Mesh * GenerateQuad();
+	
 	static Mesh* LoadFromMeshFile(const std::string& name);
-
+	
 	unsigned int GetTriCount() const {
 		int primCount = indices ? numIndices : numVertices;
 		return primCount / 3;
@@ -84,6 +85,10 @@ public:
 	bool GetSubMesh(const std::string& name, const SubMesh* s) const;
 
 protected:
+	bool GetVertexIndicesForTri(unsigned int i, unsigned int& a, unsigned int& b, unsigned int& c) const;
+	void GenerateNormals();
+	void GenerateTangents();
+	Vector4 GenerateTangent(int a, int b, int c);
 	void	BufferData();
 
 	GLuint	arrayObject;
@@ -111,7 +116,7 @@ protected:
 
 	std::vector<std::string>	jointNames;
 	std::vector<int>			jointParents;
-	std::vector< SubMesh>		meshLayers;
+	std::vector<SubMesh>		meshLayers;
 	std::vector<std::string>	layerNames;
 };
 

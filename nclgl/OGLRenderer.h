@@ -14,27 +14,27 @@ _-_-_-_-_-_-_-""  ""
 
 */
 #include "Common.h"
-
 #include <string>
 #include <fstream>
 #include <vector>
-
 #include "KHR\khrplatform.h"
 #include "glad\glad.h"
-
 #include "GL/GL.h"
 #include "KHR/WGLext.h"
-
 #include "SOIL/SOIL.h"
-
 #include "Vector4.h"
 #include "Vector3.h"
 #include "Vector2.h"
 #include "Quaternion.h"
 #include "Matrix4.h"
+#include "Matrix3.h"
 #include "Window.h"
 #include "Shader.h"
 #include "Mesh.h"
+#include "Light.h"
+#include "PointLight.h"
+#include "DirectionalLight.h"
+#include "SpotLight.h"
 
 using std::vector;
 
@@ -62,6 +62,9 @@ protected:
 	void SetBilinearFiltering(GLuint target, bool state);
 	void SetTrilinearFiltering(GLuint target, bool state);
 	void SetAnisotropicFiltering(GLuint target, bool state, GLfloat value);
+
+	void SetShaderLight(Light* light);
+	void SetShaderLights(vector<Light*> lights);
 
 	virtual void	Resize(int x, int y);	
 	void			UpdateShaderMatrices();
