@@ -3,12 +3,12 @@ uniform sampler2D diffuseTex; // Diffuse texture map
 uniform sampler2D bumpTex; // Bump map
 
 in Vertex {
-vec4 colour;
-vec2 texCoord;
-vec3 normal;
-vec3 tangent;
-vec3 binormal;
-vec3 worldPos;
+	vec4 colour;
+	vec2 texCoord;
+	vec3 normal;
+	vec3 tangent;
+	vec3 binormal;
+	vec3 worldPos;
 } IN;
 
 out vec4 fragColour [2]; // Our final outputted colours !

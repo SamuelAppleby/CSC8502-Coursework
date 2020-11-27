@@ -29,7 +29,7 @@ void main (void) {
 	float theta = 0.0;
 	if(lightRadius == 0) {	// Directional Light
 		incident = normalize(-lightDirection);
-		attenuation = 10.0;
+		attenuation = 1.0;
 	}
 	else {		// Point Light or Spot Light
 		incident = normalize(lightPos - IN.worldPos);
@@ -55,6 +55,6 @@ void main (void) {
 
 	fragColour.rgb = surface * lambert * attenuation;	// Diffuse
 	fragColour.rgb += (lightColour.rgb * specFactor) * attenuation * 0.33;	// Specular
-	fragColour.rgb = lightAngle == 0.0 ? fragColour.rgb + surface * 0.1 : fragColour.rgb + surface * attenuation;
+	fragColour.rgb = lightAngle == 0.0 ? fragColour.rgb + surface * 0.1 : fragColour.rgb + surface * attenuation;		// Ambient
 	fragColour.a = diffuse.a;
 }

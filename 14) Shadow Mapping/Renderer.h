@@ -13,17 +13,19 @@ public:
 protected:
 	void DrawShadowScene();
 	void DrawMainScene();
+
 	GLuint shadowTex;
 	GLuint shadowFBO;
 	GLuint sceneDiffuse;
 	GLuint sceneBump;
+
+	Shader* sceneShader;
+	Shader* shadowShader;
+	vector<Mesh*> sceneMeshes;
+	vector<Matrix4> sceneTransforms;
+	Camera* camera;
+	Light* light;
 	float sceneTime;
-	Shader * sceneShader;
-	Shader * shadowShader;
-	vector < Mesh* > sceneMeshes;
-	vector < Matrix4 > sceneTransforms;
-	Camera * camera;
-	Light * light;
-	float scanX = -20.0f;
+	float scanX;
 	bool direction;
 };

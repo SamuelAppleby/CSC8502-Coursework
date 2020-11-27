@@ -3,6 +3,7 @@
 class Camera;
 class Mesh;
 class HeightMap;
+const int LIGHT_NUM = 4;
 
 class Renderer : public OGLRenderer {
 public:
@@ -11,16 +12,22 @@ public:
 	void RenderScene() override;
 	void UpdateScene(float dt) override;
 protected:
+	void DrawShadowScene();
 	void FillBuffers(); //G- Buffer Fill Render Pass
 	void DrawPointLights(); // Lighting Render Pass
 	void CombineBuffers(); // Combination Render Pass
 	// Make a new texture ...
 	void GenerateScreenTexture(GLuint & into, bool depth = false);
 	
-	Shader * sceneShader; // Shader to fill our GBuffers
-	Shader * pointlightShader; // Shader to calculate lighting
-	Shader * combineShader; // shader to stick it all together
+	Shader* sceneShader; // Shader to fill our GBuffers
+	Shader* shadowShader;
+	Shader* pointlightShader; // Shader to calculate lighting
+	Shader* combineShader; // shader to stick it all together
 	
+	GLuint shadowFBO[LIGHT_NUM];
+	GLuint shadowTex[LIGHT_NUM];
+	Matrix4 shadowMatrices[LIGHT_NUM];
+
 	GLuint bufferFBO; // FBO for our G- Buffer pass
 	GLuint bufferColourTex; // Albedo goes here
 	GLuint bufferNormalTex; // Normals go here
@@ -31,10 +38,15 @@ protected:
 	GLuint lightSpecularTex; // Store specular lighting
 	HeightMap* heightMap; // Terrain !
 
-	PointLight * pointLights; // Array of lighting data
-	Mesh * sphere; // Light volume
-	Mesh * quad; // To draw a full - screen quad
-	Camera * camera; // Our usual camera
+	Mesh* sphere; // Light volume
+	Mesh* cone; // Light volume
+	Mesh* quad; // To draw a full - screen quad
+	Camera* camera; // Our usual camera
 	GLuint earthTex;
 	GLuint earthBump;
+
+	vector<Light*> lights; // Array of lighting data
+	Mesh* ball;
+	Matrix4 sceneTransform;
+	Vector3 heightmapSize;
 };

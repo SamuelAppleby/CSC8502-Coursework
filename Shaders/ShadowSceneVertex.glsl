@@ -35,6 +35,7 @@ void main (void) {
 	vec4 worldPos = (modelMatrix * vec4(position, 1));
 	OUT.worldPos = worldPos.xyz;
 	gl_Position = (projMatrix * viewMatrix) * worldPos;
+
 	vec3 viewDir = normalize(lightPos - worldPos.xyz);
 	vec4 pushVal = vec4(OUT.normal, 0) * dot(viewDir, OUT.normal);
 	OUT.shadowProj = shadowMatrix * (worldPos + pushVal);

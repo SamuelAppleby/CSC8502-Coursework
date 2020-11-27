@@ -29,7 +29,7 @@ out vec4 fragColour;void main (void) {
 	float theta = 0.0;
 	if(lightRadius == 0) {	// Directional Light
 		incident = normalize(-lightDirection);
-		attenuation = 10.0;
+		attenuation = 1.0;
 	}
 	else {		// Point Light or Spot Light
 		incident = normalize(lightPos - IN.worldPos);
