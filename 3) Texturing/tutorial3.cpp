@@ -18,26 +18,9 @@ int main() {
 			--rotate;
 			renderer.UpdateTextureMatrix(rotate);
 		}
-
 		if(Window::GetKeyboard()->KeyDown(KEYBOARD_RIGHT) ) {
 			++rotate;
 			renderer.UpdateTextureMatrix(rotate);
-		}
-
-		if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_1) ) {
-			renderer.ToggleBilinearFiltering();
-		}
-
-		if(Window::GetKeyboard()->KeyTriggered(KEYBOARD_2) ) {
-			renderer.ToggleTrilinearFiltering();
-		}
-
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_3)) {
-			renderer.ToggleAnisotropicFiltering();
-		}
-
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_4)) {
-			renderer.ToggleRepeating();
 		}
 		renderer.RenderScene();
 		renderer.SwapBuffers();

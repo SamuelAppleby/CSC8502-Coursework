@@ -20,6 +20,20 @@ void Matrix4::ToIdentity() {
 	values[15] = 1.0f;
 }
 
+void Matrix4::RemoveRotation() {
+	values[0] = 1.0f;
+	values[1] = 0.0f;
+	values[2] = 0.0f;
+
+	values[4] = 0.0f;
+	values[5] = 1.0f;
+	values[6] = 0.0f;
+
+	values[8] = 0.0f;
+	values[9] = 0.0f;
+	values[10] = 1.0f;
+}
+
 void Matrix4::ToZero()	{
 	for(int i = 0; i < 16; i++)	{
 		values[i] = 0.0f;

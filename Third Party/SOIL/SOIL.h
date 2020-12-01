@@ -10,7 +10,7 @@
 	textures into OpenGL.  Also saving and
 	loading of images is supported.
 
-	I'm using Sean's Tool Box image loader as a base:
+	I'm using Sean's Tool Box image loader as a base:dwa
 	http://www.nothings.org/
 
 	I'm upgrading it to load TGA and DDS files, and a direct

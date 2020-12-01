@@ -1,9 +1,10 @@
 #version 330 core
+const int lightSize = 11;
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projMatrix;
-uniform mat4 shadowMatrix; //a new uniform !
-uniform vec3 lightPos;
+uniform mat4 shadowMatrices[lightSize]; //a new uniform !
+uniform vec3 lightPos[lightSize];
 
 in vec3 position;
 in vec3 colour;
@@ -18,7 +19,7 @@ out Vertex {
 	vec3 tangent;
 	vec3 binormal;
 	vec3 worldPos;
-	vec4 shadowProj; //a new value !
+	vec4 shadowProj[lightSize]; //a new value !
 } OUT;
 
 void main (void) {
@@ -36,7 +37,9 @@ void main (void) {
 	OUT.worldPos = worldPos.xyz;
 	gl_Position = (projMatrix * viewMatrix) * worldPos;
 
-	vec3 viewDir = normalize(lightPos - worldPos.xyz);
-	vec4 pushVal = vec4(OUT.normal, 0) * dot(viewDir, OUT.normal);
-	OUT.shadowProj = shadowMatrix * (worldPos + pushVal);
+	for(int i = 0; i < lightSize; ++i) { 
+		vec3 viewDir = normalize(lightPos[i] - worldPos.xyz);
+		vec4 pushVal = vec4(OUT.normal, 0) * dot(viewDir, OUT.normal);
+		OUT.shadowProj[i] = shadowMatrices[i] * (worldPos + pushVal);
+	}
 }

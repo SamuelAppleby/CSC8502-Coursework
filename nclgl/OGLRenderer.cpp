@@ -141,7 +141,10 @@ OGLRenderer::OGLRenderer(Window &window)	{
 	glClearColor(0.2f,0.2f,0.2f,1.0f);			//When we clear the screen, we want it to be dark grey
 
 	currentShader = 0;							//0 is the 'null' object name for shader programs...
-
+	biFiltering = false;
+	triFiltering = false;
+	anisotropicFiltering = false;
+	currentAF = 0;
 	window.SetRenderer(this);					//Tell our window about the new renderer! (Which will in turn resize the renderer window to fit...)
 }
 
@@ -165,30 +168,60 @@ Resizes the rendering area. Should only be called by the Window class!
 Does lower bounds checking on input values, so should be reasonably safe
 to call.
 */
-
+void OGLRenderer::ToggleBilinearFiltering(vector<GLuint> textures) {
+	if (triFiltering)
+		ToggleTrilinearFiltering(textures);
+	biFiltering = !biFiltering;
+	for (auto& texture : textures) {
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, biFiltering ? GL_LINEAR : GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, biFiltering ? GL_LINEAR : GL_NEAREST);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	biFiltering ? std::cout << "BiLinear Filtering ON!" << std::endl : std::cout << "BiLinear Filtering OFF!" << std::endl;
+}
+void OGLRenderer::ToggleTrilinearFiltering(vector<GLuint> textures) {
+	if (biFiltering)
+		ToggleBilinearFiltering(textures);
+	triFiltering = !triFiltering;
+	for (auto& texture : textures) {
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, triFiltering ? GL_LINEAR_MIPMAP_NEAREST : GL_NEAREST);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	triFiltering ? std::cout << "Trilinear Filtering ON!" << std::endl : std::cout << "Trilinear Filtering OFF!" << std::endl;
+}
+void OGLRenderer::ToggleAnisotropicFiltering(vector<GLuint> textures) {
+	GLfloat max;
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &max);
+	switch (currentAF) {
+	case(0):
+		currentAF = 4;
+		anisotropicFiltering = true;
+		break;
+	case(4):
+		currentAF = 8;
+		break;
+	case(8):
+		currentAF = 16;
+		break;
+	case(16):
+		currentAF = 0;
+		anisotropicFiltering = false;
+		break;
+	}
+	for (auto& texture : textures) {
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, anisotropicFiltering ? currentAF : 1.0f);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	anisotropicFiltering ? std::cout << "AnistropicFiltering Filtering ON: " << currentAF << "x"
+		<< std::endl : std::cout << "AnistropicFiltering Filtering OFF!" << std::endl;
+}
 void OGLRenderer::SetTextureRepeating(GLuint target, bool repeating) {
 	glBindTexture(GL_TEXTURE_2D, target);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeating ? GL_REPEAT : GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeating ? GL_REPEAT : GL_CLAMP);
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void OGLRenderer::SetBilinearFiltering(GLuint target, bool biFiltering) {
-	glBindTexture(GL_TEXTURE_2D, target);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, biFiltering ? GL_LINEAR : GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, biFiltering ? GL_LINEAR : GL_NEAREST);
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void OGLRenderer::SetTrilinearFiltering(GLuint target, bool triFiltering) {
-	glBindTexture(GL_TEXTURE_2D, target);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, triFiltering ? GL_LINEAR_MIPMAP_NEAREST : GL_NEAREST);
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void OGLRenderer::SetAnisotropicFiltering(GLuint target, bool anisotropicFiltering, GLfloat value) {
-	glBindTexture(GL_TEXTURE_2D, target);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, anisotropicFiltering ? value : 1.0f);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -220,6 +253,7 @@ void OGLRenderer::SetShaderLights(vector<Light*> lights) {
 	vector<float> lightRadii;
 	vector<Vector3> lightDirections;
 	vector<float> lightAngles;
+	int i = 0;
 	for (auto& light : lights) {
 		lightColours.push_back(light->GetColour());
 		if (SpotLight* s = dynamic_cast<SpotLight*> (light)) {
@@ -235,11 +269,12 @@ void OGLRenderer::SetShaderLights(vector<Light*> lights) {
 			lightAngles.push_back(0.0f);
 		}
 		else if (DirectionalLight* d = dynamic_cast<DirectionalLight*> (light)) {
-			lightPositions.push_back(Vector3(0, 0, 0));
+			lightPositions.push_back(Vector3(0, 5, 0));
 			lightRadii.push_back(0.0f);
 			lightDirections.push_back(d->GetDirection());
 			lightAngles.push_back(0.0f);
 		}
+		++i;
 	}
 	glUniform3fv(glGetUniformLocation(currentShader->GetProgram(), "lightPos"), lights.size(), reinterpret_cast<GLfloat*>(lightPositions.data()));
 	glUniform4fv(glGetUniformLocation(currentShader->GetProgram(), "lightColour"), lights.size(), reinterpret_cast<GLfloat*>(lightColours.data()));

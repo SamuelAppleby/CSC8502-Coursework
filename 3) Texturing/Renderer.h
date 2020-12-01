@@ -7,15 +7,11 @@ public:
 	virtual ~Renderer(void);
 	virtual void RenderScene();
 	void UpdateTextureMatrix(float rotation);
-	void ToggleBilinearFiltering();
-	void ToggleTrilinearFiltering();
-	void ToggleAnisotropicFiltering();
-	void ToggleRepeating();
 
 protected:
 	Shader * shader;
 	Mesh * triangle;
-	GLuint texture;
+	vector<GLuint> textures;
 
 	bool biFiltering;
 	bool triFiltering;

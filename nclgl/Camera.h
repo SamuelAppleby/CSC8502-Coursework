@@ -18,7 +18,7 @@ public:
 		this->roll = roll;
 		this->position = position;
 		enabled = false;
-		velocity = 300.0f;
+		velocity = 1000.0f;
 	}
 	~Camera(void) {};
 	void UpdateCamera(float dt = 1.0f);

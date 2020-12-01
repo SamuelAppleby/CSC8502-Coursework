@@ -12,6 +12,6 @@ out Vertex {
 } OUT;
 
 void main (void) {
-	gl_Position = projMatrix * viewMatrix * modelMatrix * vec4 ( position , 1.0);
+	gl_Position = projMatrix * viewMatrix * modelMatrix * vec4 (position, 1.0);
 	OUT.texCoord = (textureMatrix * vec4 (texCoord , 0.0 , 1.0)).xy;
 }

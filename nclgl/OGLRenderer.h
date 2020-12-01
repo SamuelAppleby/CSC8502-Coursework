@@ -58,10 +58,10 @@ public:
 	bool			HasInitialised() const;	
 	
 protected:
+	void ToggleBilinearFiltering(vector<GLuint> textures);
+	void ToggleTrilinearFiltering(vector<GLuint> textures);
+	void ToggleAnisotropicFiltering(vector<GLuint> textures);
 	void SetTextureRepeating(GLuint target, bool state);
-	void SetBilinearFiltering(GLuint target, bool state);
-	void SetTrilinearFiltering(GLuint target, bool state);
-	void SetAnisotropicFiltering(GLuint target, bool state, GLfloat value);
 
 	void SetShaderLight(Light* light);
 	void SetShaderLights(vector<Light*> lights);
@@ -84,12 +84,17 @@ protected:
 	Matrix4 textureMatrix;	//Texture matrix
 	Matrix4 shadowMatrix;
 
-	int		width;			//Render area width (not quite the same as window width)
-	int		height;			//Render area height (not quite the same as window height)
-	bool	init;			//Did the renderer initialise properly?
+	Shader* currentShader;
+
+	int	width;			//Render area width (not quite the same as window width)
+	int	height;			//Render area height (not quite the same as window height)
+	bool init;			//Did the renderer initialise properly?
+	bool biFiltering;
+	bool triFiltering;
+	bool anisotropicFiltering;
+	int currentAF;
 
 private:
-	Shader* currentShader;	
 	HDC		deviceContext;	//...Device context?
 	HGLRC	renderContext;	//Permanent Rendering Context
 #ifdef _DEBUG
