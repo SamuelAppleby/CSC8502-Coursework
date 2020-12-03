@@ -14,11 +14,13 @@ in Vertex {
 } IN;
 
 out vec4 fragColour;void main (void) {
+	vec4 diffuse = texture(diffuseTex, IN.texCoord);
+
 	mat3 TBN = mat3(normalize(IN.tangent), normalize(IN.binormal), normalize(IN.normal));
 	vec3 bumpNormal = texture(bumpTex, IN.texCoord).rgb;
 	bumpNormal = normalize(TBN * normalize(bumpNormal * 2 - 1));
 	bumpNormal = normalize(bumpNormal + IN.normal);
-	vec4 diffuse = texture(diffuseTex, IN.texCoord);
+
 	vec3 viewDir = normalize(cameraPos - IN.worldPos);
 	vec3 reflectDir = reflect(-viewDir, normalize(bumpNormal));
 	vec4 reflectTex = texture(cubeTex, reflectDir);

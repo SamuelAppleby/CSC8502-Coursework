@@ -5,7 +5,8 @@
 #include <nclgl\ResourceManager.h>
 #include <nclgl\MeshAnimation.h>
 #include <nclgl\MeshMaterial.h>
-const int LIGHT_NUM = 11;
+const int LIGHT_NUM = 12;
+const int POST_PASSES = 2;
 
 class Camera;
 class Mesh;
@@ -17,13 +18,14 @@ public:
 	void UpdateScene(float dt) override;
 	void RenderScene() override;
 protected:
-	void DayNightCycle(float dt);
-	void DrawSkybox(int camera);
+	void AnimateObjects();
+	void DayNightCycle();
+	void DrawSkybox();
 	void DrawShadowScene();
 	void DrawMainScene(int camera);
-	void DrawAnimation(int camera);
-	void DrawWater(int camera);
-	void DrawRain(float dt);
+	void DrawRain();
+	void DrawPostProcess();
+	void PresentScene();
 	bool SetTexture(GLuint texID, GLuint unit, const std::string& uniformName, Shader* s);
 	GLuint shadowFBO[LIGHT_NUM];
 	GLuint shadowTex[LIGHT_NUM];
@@ -49,6 +51,12 @@ protected:
 	bool rainInit;
 
 	float turnTimer;
+	bool turning;
 	float carTimer;
-	bool straight;
+	bool forward;
+
+	GLuint bufferFBO;
+	GLuint processFBO;
+	GLuint bufferColourTex[2];
+	GLuint bufferDepthTex;
 };

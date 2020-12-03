@@ -6,7 +6,7 @@
 class ResourceManager {
 public:
 	~ResourceManager() {
-		for (auto& shader : shaders)
+		for (auto& shader : sceneShaders)
 			delete shader;
 		for (auto& mesh : sceneMeshes)
 			delete mesh;
@@ -19,19 +19,16 @@ public:
 		for (auto& camera : cameras)
 			delete camera;
 	}
-	vector<Shader*> shaders;
-	vector<GLuint> textures;
+	vector<Shader*> sceneShaders;
+	vector<GLuint> sceneTextures;
 	vector<Mesh*> sceneMeshes;
+	vector<Matrix4> sceneTransforms;
 
 	vector<MeshMaterial*> sceneMaterials;
 	vector<MeshAnimation*> sceneAnimations;
 	vector <vector<GLuint>> matTextures;
 
-	vector<Matrix4> sceneTransforms;
 	vector<Light*> lights;
-	vector<Camera*> cameras;
-
-protected:
-	
+	vector<Camera*> cameras;	
 };
 

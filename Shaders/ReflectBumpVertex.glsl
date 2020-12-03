@@ -19,12 +19,14 @@ out Vertex {
 } OUT;
 
 void main (void) {
+	OUT.texCoord = (textureMatrix * vec4 (texCoord, 0.0, 1.0)).xy;
 	mat3 normalMatrix = transpose(inverse(mat3(modelMatrix)));
 	vec3 wNormal = normalize(normalMatrix * normalize(normal));
 	vec3 wTangent = normalize(normalMatrix * normalize (tangent.xyz));
+
 	OUT.normal = wNormal;
 	OUT.tangent = wTangent;	OUT.binormal = cross(wTangent, wNormal) * tangent.w;
-	OUT.texCoord = (textureMatrix * vec4 (texCoord, 0.0, 1.0)).xy;
+
 	vec4 worldPos = (modelMatrix * vec4(position, 1));
 	OUT.worldPos = worldPos.xyz;
 	gl_Position = (projMatrix * viewMatrix) * worldPos;

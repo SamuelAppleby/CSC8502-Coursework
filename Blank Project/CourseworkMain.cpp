@@ -2,7 +2,7 @@
 #include "Renderer.h"
 
 int main() {
-	Window w("CyberPunk", 1920, 1080, true); 
+	Window w("CyberPunk", 1280, 720, false); 
 	if (!w.HasInitialised()) 
 		return -1;
 	Renderer renderer(w); 

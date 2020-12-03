@@ -1,9 +1,11 @@
 #version 330 core
-#define lightSize 11
+#define lightSize 12
 uniform sampler2D diffuseTex;
 uniform sampler2D bumpTex; 
-uniform sampler2D shadowTex[lightSize]; 
+uniform samplerCube cubeTex;
 uniform vec3 cameraPos;
+
+uniform sampler2D shadowTex[lightSize]; 
 uniform float shine;
 uniform float iridescence;
 uniform vec4 lightColour[lightSize];
@@ -11,6 +13,10 @@ uniform vec3 lightPos[lightSize];
 uniform float lightRadius[lightSize];
 uniform vec3 lightDirections[lightSize];
 uniform float lightAngles[lightSize];
+
+uniform bool reflected;
+uniform float reflectBrightness;
+
 in Vertex {
 	vec3 colour;
 	vec2 texCoord;
@@ -48,12 +54,19 @@ void main (void) {
 				}
 			}
 		}
-		vec3 viewDir = normalize(cameraPos - IN.worldPos);
-		vec3 halfDir = normalize(incident + viewDir);
-		
+
 		mat3 TBN = mat3(normalize(IN.tangent), normalize(IN.binormal), normalize(IN.normal));
 		vec3 bumpNormal = texture(bumpTex, IN.texCoord).rgb;
 		bumpNormal = normalize(TBN * normalize(bumpNormal * 2.0 - 1.0));
+
+		vec3 viewDir = normalize(cameraPos - IN.worldPos);
+		vec3 halfDir;
+		if(reflected) {
+			halfDir = reflect(-viewDir, normalize(bumpNormal));
+		}
+		else {
+			halfDir = normalize(incident + viewDir);
+		}
 
 		float lambert = max(dot(incident, bumpNormal), 0.0f);
 		float specFactor = clamp(dot(halfDir, bumpNormal), 0.0, 1.0);
@@ -75,6 +88,12 @@ void main (void) {
 		temp *= shadow;
 		fragColour.rgb += temp;
 		fragColour.rgb = lightAngles[i] == 0.0 ? fragColour.rgb + surface * 0.01 : fragColour.rgb + surface * attenuation;
-		fragColour.a += diffuse.a;
+		if(reflected) {
+			vec4 reflectTex = texture(cubeTex, halfDir);
+			fragColour = (reflectTex + diffuse) * reflectBrightness;		
+		}
+		else {
+			fragColour.a += diffuse.a;
+		}
 	}
 }
