@@ -13,10 +13,10 @@ void Camera::UpdateCamera(float dt) {
 		yaw -= 360.0f;
 	}
 	if (Window::GetKeyboard()->KeyDown(KEYBOARD_Z)) {
-		roll += velocity;
+		roll += dt * velocity;
 	}
 	if (Window::GetKeyboard()->KeyDown(KEYBOARD_X)) {
-		roll -= velocity;
+		roll -= dt * velocity;
 	}
 	if (roll < 0) {
 		roll += 360.0f;

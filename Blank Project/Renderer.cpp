@@ -6,7 +6,7 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	resources = new ResourceManager();
 	heightMap = new HeightMap(TEXTUREDIR "rivermap.png");
 	heightmapSize = heightMap->GetHeightmapSize();
-	resources->cameras.push_back(new Camera(0.0f, 0.0f, 0.0f, heightmapSize * Vector3(0.5, 2.0f,1)));
+	resources->cameras.push_back(new Camera(-45.0f, 45, 0.0f, heightmapSize * Vector3(1, 30.0f, 1)));
 	resources->cameras.push_back(new Camera(-90, 0, 0.0f, heightmapSize * Vector3(0.5, 50.0f, 0.5)));
 
 	/* Shaders */
@@ -62,9 +62,8 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	resources->sceneTransforms.push_back(Matrix4::Translation(heightmapSize * Vector3(0.1, 1, 0.3) + Vector3(0, -500, 0)) * Matrix4::Rotation(45, Vector3(0, 1, 0)) 
 		* Matrix4::Scale(Vector3(150, 150, 150)));
 	resources->sceneTransforms.push_back(Matrix4::Translation(heightmapSize * 0.5f) * Matrix4::Scale(heightmapSize * 0.5f) * Matrix4::Rotation(90, Vector3(1, 0, 0)));
-	resources->sceneTransforms.push_back(Matrix4::Translation(heightmapSize * Vector3(0.77, 0.8, 0.63)) * Matrix4::Scale(Vector3(100, 100, 100))
-		* Matrix4::Rotation(90, Vector3(0, 1, 0)));
-	resources->sceneTransforms.push_back(Matrix4::Translation(Vector3(-600, -25780, -69000)) * Matrix4::Scale(Vector3(80, 150, 300)));
+	resources->sceneTransforms.push_back(Matrix4::Translation(heightmapSize * Vector3(0.62, 0.8, 0.60)) * Matrix4::Scale(Vector3(100, 100, 100)));
+	resources->sceneTransforms.push_back(Matrix4::Translation(Vector3(-600, -25780, -65100)) * Matrix4::Scale(Vector3(80, 150, 285)));
 	resources->sceneTransforms.push_back(Matrix4::Translation(Vector3(-32800, -24000, -8500)) * Matrix4::Scale(Vector3(300, 300, 300)) * 
 		Matrix4::Rotation(90, Vector3(0, 1, 0)));
 	resources->sceneTransforms.push_back(Matrix4::Translation(Vector3(-32800, -24000, -14000)) * Matrix4::Scale(Vector3(300, 300, 300)) *
@@ -74,7 +73,7 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	resources->sceneTransforms.push_back(Matrix4::Translation(Vector3(41200, -24000, 17500)) * Matrix4::Scale(Vector3(300, 300, 300)) *
 		Matrix4::Rotation(270, Vector3(0, 1, 0)));
 	resources->sceneTransforms.push_back(Matrix4::Translation(Vector3(24700, -35100, -50200)) * Matrix4::Scale(Vector3(400, 400, 400)));
-	resources->sceneTransforms.push_back(Matrix4::Translation(heightmapSize * Vector3(0.282, 3, 0.355)) * Matrix4::Scale(Vector3(350, 400, 400)) * 
+	resources->sceneTransforms.push_back(Matrix4::Translation(heightmapSize * Vector3(0.283, 3, 0.354)) * Matrix4::Scale(Vector3(350, 400, 400)) * 
 		Matrix4::Rotation(42, Vector3(0, 1, 0)) * Matrix4::Rotation(180, Vector3(1, 0, 0)));
 	resources->sceneTransforms.push_back(Matrix4::Translation(heightmapSize * Vector3(0.5, 1, 0.8) + Vector3(0, -600, 0)) * Matrix4::Scale(Vector3(150, 200, 250))
 		* Matrix4::Rotation(45, Vector3(0, 1, 0)));
@@ -157,6 +156,9 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 		case(11):
 			resources->lights.push_back(new SpotLight(heightmapSize * Vector3(0.485f, 1.5f, 0.2f), Vector4(1, 1, 1, 1), Vector3(0, 0, 1), 3000.0f, 50.0f));
 			break;
+		case(12):
+			resources->lights.push_back(new SpotLight(Vector3(0, 0, 0), Vector4(0, 0, 0, 1), Vector3(0, -1, 0), 6000.0f, 5.0f));
+			break;
 		}
 	}
 	/* Shadow buffers and FBOs */
@@ -210,17 +212,20 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	sceneTime = 0.0f;
 	currentFrame = 0;
 	animTime = 0.0f;
-	brightness = 0.2f;
+	brightness = 0.15f;
 	waterCycle = 0.0f;
 	dayTime = 0.1f;
 	restTime = 10.0f;
+	dayCycle = false;
 	daySwap = true;
+	resetCam = true;
 	init = true;
 	rainInit = false;
-	turnTimer = 0.0f;
-	turning = true;
-	carTimer = 0.0f;
+	turning = false;
 	forward = true;
+	onRails = true;
+	postProcess = false;
+	flashlight = false;
 	particles.reserve(nr_particles);
 }
 Renderer::~Renderer(void) {
@@ -234,47 +239,148 @@ Renderer::~Renderer(void) {
 	delete heightMap;
 }
 void Renderer::UpdateScene(float dt) {
-	frameTime = dt;
-	sceneTime += frameTime;
-	waterCycle += frameTime * 0.25f; // 10 units a second
-	animTime -= dt;
-	turnTimer += dt;
-	if (rainInit)
-		carTimer += dt;
-	resources->cameras.at(0)->UpdateCamera(frameTime);
-	AnimateObjects();
-	DayNightCycle();
+	if (dt < 0.5f) {
+		frameTime = dt;
+		sceneTime += frameTime;
+		waterCycle += frameTime * 0.25f;
+		animTime -= dt;
+		AnimateObjects();
+		if (dayCycle)
+			DayNightCycle();
+		if (!onRails)
+			resources->cameras.at(0)->UpdateCamera(frameTime);
+		else {
+			if (resetCam) {
+				resources->cameras.at(0)->SetPosition(heightmapSize * Vector3(1, 30.0f, 1));
+				resources->cameras.at(0)->SetYaw(45.0f);
+				resources->cameras.at(0)->SetPitch(-45.0f);
+				resources->cameras.at(0)->SetRoll(0.0f);
+				sceneTime = 0.0f;
+				resetCam = false;
+			}
+			TraverseScene();
+		}
+		resources->lights.at(0)->SetColour(Vector4(brightness, brightness, brightness, 1));
+	}
+}
+void Renderer::TraverseScene() {
+	if (sceneTime < 30.0f) {
+		if ((int)resources->cameras.at(0)->GetYaw() != 0) {
+			resources->cameras.at(0)->MoveRight(frameTime * 1.5);
+			resources->cameras.at(0)->LookLeft(frameTime / 80);
+		}
+		if ((int)resources->cameras.at(0)->GetYaw() == 225 && !postProcess)
+			postProcess = !postProcess;
+		if ((int)resources->cameras.at(0)->GetYaw() == 0 && postProcess)
+			postProcess = !postProcess;
+	}
+	if ((int)resources->cameras.at(0)->GetYaw() == 0 && sceneTime < 33.0f) {
+		dayCycle = false;
+		if (abs((int)resources->cameras.at(0)->GetPosition().x - heightmapSize.x / 2) > 5)
+			resources->cameras.at(0)->MoveRight(frameTime / 8);
+		if ((int)resources->cameras.at(0)->GetPitch() < 0) 
+			resources->cameras.at(0)->LookUp(frameTime / 100);
+		if ((int)resources->cameras.at(0)->GetPosition().y > 500) 
+			resources->cameras.at(0)->MoveDown(frameTime * 1.2);
+	}
+	if ((sceneTime > 33.0f && sceneTime < 36.0f) || (sceneTime > 42.0f && sceneTime < 44.0f)) {
+		resources->cameras.at(0)->SetYaw(0);
+		resources->cameras.at(0)->MoveForward(1.1 * frameTime);
+	}
+	if (sceneTime > 36.0f && sceneTime < 42.0f) {
+		if((int)resources->cameras.at(0)->GetYaw() != -90)
+			resources->cameras.at(0)->SetYaw(-90);
+		resources->cameras.at(0)->MoveLeft(frameTime / 2);
+	}
+	if (sceneTime > 42.0f && sceneTime < 44.0f) {
+		if ((int)resources->cameras.at(0)->GetPitch() != -90)
+			resources->cameras.at(0)->LookDown(frameTime / 20);
+		if ((int)resources->cameras.at(0)->GetPosition().y < 6000)
+			resources->cameras.at(0)->MoveUp(frameTime * 1.5);
+	}
+	if (sceneTime > 46.0f && sceneTime < 55.0f) {
+		resources->cameras.at(0)->MoveBack(0.6 * frameTime);
+	}
+	if (sceneTime > 55.0f && sceneTime < 60.0f) {
+			resources->cameras.at(0)->MoveForward(0.8 * frameTime);
+	}
+	if (sceneTime > 60.0f && sceneTime < 65.0f) {
+		if ((int)resources->cameras.at(0)->GetPosition().y > 500)
+			resources->cameras.at(0)->MoveDown(0.6 * frameTime);
+		if ((int)resources->cameras.at(0)->GetYaw() > 270 || (int)resources->cameras.at(0)->GetYaw() < 90)
+			resources->cameras.at(0)->LookLeft(frameTime / 20);
+		if ((int)resources->cameras.at(0)->GetPitch() < 0)
+			resources->cameras.at(0)->LookUp(frameTime / 20);
+	}
+	if (sceneTime > 65.0f && sceneTime < 71.0f) {
+		if (resources->cameras.at(0)->GetPosition().x > 500)
+			resources->cameras.at(0)->MoveBack(0.8 * frameTime);
+	}
+	if (sceneTime > 71.0f && sceneTime < 75.0f) {
+		if (resources->cameras.at(0)->GetPosition().x > (heightmapSize.x / 2) + 500)
+			resources->cameras.at(0)->MoveForward(0.8 * frameTime);
+	}
+	if (sceneTime > 75.0f && sceneTime < 80.0f) {
+		if (resources->cameras.at(0)->GetYaw() < 180)
+			resources->cameras.at(0)->LookLeft(frameTime / 40);
+	}
+	if (sceneTime > 80.0f && sceneTime < 94.0f) {
+		resources->cameras.at(0)->MoveRight(frameTime * 0.45);
+		resources->cameras.at(0)->LookLeft(frameTime / 80);
+	}
+	if (sceneTime > 94.0f) {
+		if((int)resources->cameras.at(0)->GetPosition().x > heightmapSize.x / 2)
+			resources->cameras.at(0)->MoveLeft(frameTime * 0.80);
+		if ((int)resources->cameras.at(0)->GetPosition().y < heightmapSize.y * 50)
+			resources->cameras.at(0)->MoveUp(frameTime * 0.80);
+		if ((int)resources->cameras.at(0)->GetPosition().z > heightmapSize.z / 2)
+			resources->cameras.at(0)->MoveForward(frameTime * 0.80);
+		if ((int)resources->cameras.at(0)->GetPitch() > -90)
+			resources->cameras.at(0)->LookDown(frameTime / 80);
+		if ((int)resources->cameras.at(0)->GetYaw() != 0)
+			resources->cameras.at(0)->LookLeft(frameTime / 80);
+	}
+	if (sceneTime > 105.0f)
+		dayCycle = true;
 }
 void Renderer::AnimateObjects() {
 	while (animTime < 0.0f) {
 		currentFrame = (currentFrame + 1) % resources->sceneAnimations.at(0)->GetFrameCount();
 		animTime += 1.0f / resources->sceneAnimations.at(0)->GetFrameRate();
 	}
-	if (turnTimer > 10.0) {
+	if (fmod(sceneTime, 10) < frameTime && !turning) 
 		turning = true;
-		turnTimer = 0.0f;
-	}
 	if (turning) {
 		resources->sceneTransforms.at(6) = resources->sceneTransforms.at(6) * Matrix4::Rotation(90, Vector3(0, 1, 0));
 		turning = !turning;
 	}
 	else
 		resources->sceneTransforms.at(6) = resources->sceneTransforms.at(6) * Matrix4::Translation(Vector3(0, 0, 1.3 * frameTime));
-	if (carTimer > 11.0f) {
+	if (fmod(sceneTime, 11) < frameTime) {
 		forward = !forward;
-		carTimer = 0.0f;
 	}
-	if (carTimer > 0.0f) {
+	if (forward) {
 		SpotLight* s = dynamic_cast<SpotLight*> (resources->lights.at(11));
-		if (forward) {
-			resources->sceneTransforms.at(12) = resources->sceneTransforms.at(12) * Matrix4::Translation(Vector3(0, 0, 1.4 * frameTime));
-			s->SetPosition(Matrix4::Translation(Vector3(0, 0, 8.4)) * s->GetPosition());
-		}
-		else {
-			resources->sceneTransforms.at(12) = resources->sceneTransforms.at(12) * Matrix4::Translation(Vector3(0, 0, -1.4 * frameTime));
-			s->SetPosition(Matrix4::Translation(Vector3(0, 0, -8.4)) * s->GetPosition());
-		}
+		resources->sceneTransforms.at(12) = resources->sceneTransforms.at(12) * Matrix4::Translation(Vector3(0, 0, 1.4 * frameTime));
+		s->SetPosition(Matrix4::Translation(Vector3(0, 0, 9.2)) * s->GetPosition());
 	}
+	else {
+		SpotLight* s = dynamic_cast<SpotLight*> (resources->lights.at(11));
+		resources->sceneTransforms.at(12) = resources->sceneTransforms.at(12) * Matrix4::Translation(Vector3(0, 0, -1.4 * frameTime));
+		s->SetPosition(Matrix4::Translation(Vector3(0, 0, -9.2)) * s->GetPosition());
+	}
+
+	/* Creating flashlight effect from spotlight */
+	Matrix3 newMat = Matrix3(resources->cameras.at(0)->BuildViewMatrix());
+	newMat.Transpose();
+	Vector3 flashLight = newMat * Vector3(0, 0, -1);
+	SpotLight* s = dynamic_cast<SpotLight*> (resources->lights.at(12));
+	s->SetPosition(resources->cameras.at(0)->GetPosition());
+	s->SetDirection(flashLight);
+	if (flashlight) 
+		resources->lights.at(12)->SetColour(Vector4(1, 1, 1, 1));
+	else
+		resources->lights.at(12)->SetColour(Vector4(0, 0, 0, 1));
 }
 void Renderer::DayNightCycle() {
 	if (restTime > 0.0f) {
@@ -293,11 +399,10 @@ void Renderer::DayNightCycle() {
 		daySwap = dayTime > 0 ? true : false;
 		restTime = 5.0f;
 	}
-	if (brightness < 0.2)
-		brightness = 0.2;
+	if (brightness < 0.15)
+		brightness = 0.15;
 	if (brightness > 0.6)
 		brightness = 0.6;
-	resources->lights.at(0)->SetColour(Vector4(0.2, 0.2, 0.2, 1));
 }
 void Renderer::RenderScene() {
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -305,31 +410,42 @@ void Renderer::RenderScene() {
 	DrawSkybox();
 	DrawMainScene(0);
 	DrawRain();
-	DrawPostProcess();
-	PresentScene();
-
+	if (postProcess) {
+		DrawPostProcess();
+		PresentScene();
+	}
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glViewport(0.75 * width, 0.66 * height, (width / height) * width / 3, (width / height) * height / 3);		// Minimap
 	DrawMainScene(1);
 	glViewport(0, 0, width, height);		// Reset the skybox
+
 	/* Filtering options */
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_1)) {
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_1)) 
 		ToggleBilinearFiltering(resources->sceneTextures);
-	}
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_2)) {
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_2)) 
 		ToggleTrilinearFiltering(resources->sceneTextures);
-	}
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_3)) {
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_3)) 
 		ToggleAnisotropicFiltering(resources->sceneTextures);
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_N)) 
+		dayCycle = !dayCycle;
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_R)) {
+		resetCam = true;
+		onRails = !onRails;
 	}
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_P)) 
+		postProcess = !postProcess;
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_F))
+		flashlight = !flashlight;
 }
 void Renderer::DrawSkybox() {
-	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	if (postProcess) {
+		glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	}
 	glDepthMask(GL_FALSE);
 	BindShader(resources->sceneShaders.at(0));
 	viewMatrix = resources->cameras.at(0)->BuildViewMatrix();
-	projMatrix = Matrix4::Perspective(1.0f, 15000.0f, (float)width / (float)height, 45);
+	projMatrix = Matrix4::Perspective(10.0f, 15000.0f, (float)width / (float)height, 45);
 	UpdateShaderMatrices();
 	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "brightness"), brightness);
 	resources->sceneMeshes.at(3)->Draw();
@@ -353,7 +469,7 @@ void Renderer::DrawShadowScene() {
 		else if (DirectionalLight* d = dynamic_cast<DirectionalLight*> (resources->lights.at(i)))
 			viewMatrix = Matrix4::BuildViewMatrix(Vector3(heightmapSize.x / 2 - 0.1, 1000, heightmapSize.z / 2), 
 				Vector3(heightmapSize.x / 2, 0, heightmapSize.z / 2), Vector3(1, 0, 0));
-		projMatrix = Matrix4::Perspective(1.0f, 15000.0f, (float)width / (float)height, 120);
+		projMatrix = Matrix4::Perspective(10.0f, 15000.0f, (float)width / (float)height, 120);
 		shadowMatrices[i] = projMatrix * viewMatrix; 
 
 		/* HeightMap */
@@ -456,14 +572,14 @@ void Renderer::DrawMainScene(int camera) {
 	SetShaderLights(resources->lights);
 	modelMatrix.ToIdentity();
 	viewMatrix = resources->cameras.at(camera)->BuildViewMatrix();
-	projMatrix = Matrix4::Perspective(1.0f, 15000.0f, (float)width / (float)height, 45.0f);
+	projMatrix = Matrix4::Perspective(10.0f, 15000.0f, (float)width / (float)height, 45.0f);
 	UpdateShaderMatrices();
 
 	glUniform1i(glGetUniformLocation(resources->sceneShaders.at(2)->GetProgram(), "cubeTex"), 2);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
 
-	int arr[LIGHT_NUM] = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
+	int arr[LIGHT_NUM] = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 	glUniform1iv(glGetUniformLocation(currentShader->GetProgram(), "shadowTex"), LIGHT_NUM, (GLint*)arr);
 	for (int i = 0; i < LIGHT_NUM; i++) {
 		glActiveTexture(GL_TEXTURE3 + i);
@@ -520,7 +636,7 @@ void Renderer::DrawMainScene(int camera) {
 	SetTexture(resources->sceneTextures.at(2), 0, "diffuseTex", currentShader);
 	SetTexture(resources->sceneTextures.at(8), 1, "bumpTex", currentShader);		// Dot3 on water
 	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "reflected"), true);
-	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "reflectBrightness"), 0.3);
+	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "reflectBrightness"), brightness);
 	modelMatrix = resources->sceneTransforms.at(5);
 	textureMatrix = Matrix4::Translation(Vector3(waterCycle, 0.0f, waterCycle)) * Matrix4::Scale(Vector3(10, 10, 10));
 	UpdateShaderMatrices();
@@ -594,7 +710,7 @@ void Renderer::DrawMainScene(int camera) {
 
 	/* Car */
 	SetTexture(resources->sceneTextures.at(12), 0, "diffuseTex", currentShader);
-	SetTexture(resources->sceneTextures.at(13), 1, "bumpTex", currentShader);
+	SetTexture(resources->sceneTextures.at(8), 1, "bumpTex", currentShader);
 	modelMatrix = resources->sceneTransforms.at(12);		
 	UpdateShaderMatrices();
 	resources->sceneMeshes.at(11)->Draw();
@@ -604,7 +720,7 @@ void Renderer::DrawRain() {
 	SetTexture(resources->sceneTextures.at(4), 0, "diffuseTex", currentShader);
 	for (int i = 0; i < nr_particles; ++i) {
 		viewMatrix = resources->cameras.at(0)->BuildViewMatrix();
-		projMatrix = Matrix4::Perspective(1.0f, 15000.0f, (float)width / (float)height, 45);
+		projMatrix = Matrix4::Perspective(10.0f, 15000.0f, (float)width / (float)height, 45);
 		Vector3 randLoc(rand() % (int)heightmapSize.x, rand() % 10000 + 6000, rand() % (int)heightmapSize.z);
 		if (!rainInit) {
 			particles.push_back(Particle(resources->sceneMeshes.at(3), randLoc));
@@ -620,7 +736,8 @@ void Renderer::DrawRain() {
 		particles.at(i).GetMesh()->Draw();
 	}
 	rainInit = true;
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);		// Unbind the depth buffer
+	if(postProcess)
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);		// Unbind the depth buffer
 }
 void Renderer::DrawPostProcess() {
 	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);

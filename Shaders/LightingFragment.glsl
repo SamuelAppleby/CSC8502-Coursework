@@ -1,5 +1,5 @@
 #version 330 core
-#define lightSize 12
+#define lightSize 13
 uniform sampler2D diffuseTex;
 uniform sampler2D bumpTex; 
 uniform samplerCube cubeTex;

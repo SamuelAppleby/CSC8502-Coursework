@@ -5,8 +5,8 @@
 #include <nclgl\ResourceManager.h>
 #include <nclgl\MeshAnimation.h>
 #include <nclgl\MeshMaterial.h>
-const int LIGHT_NUM = 12;
-const int POST_PASSES = 2;
+const int LIGHT_NUM = 13;
+const int POST_PASSES = 6;
 
 class Camera;
 class Mesh;
@@ -18,6 +18,7 @@ public:
 	void UpdateScene(float dt) override;
 	void RenderScene() override;
 protected:
+	void TraverseScene();
 	void AnimateObjects();
 	void DayNightCycle();
 	void DrawSkybox();
@@ -39,6 +40,8 @@ protected:
 	float dayTime;
 	float restTime;
 	float waterCycle;
+	bool dayCycle;
+	bool resetCam;
 	Vector3 heightmapSize;
 	HeightMap* heightMap;
 	GLuint cubeMap;
@@ -50,13 +53,14 @@ protected:
 	vector<Particle> particles;
 	bool rainInit;
 
-	float turnTimer;
+	bool onRails;
 	bool turning;
-	float carTimer;
 	bool forward;
-
+	bool postProcess;
 	GLuint bufferFBO;
 	GLuint processFBO;
 	GLuint bufferColourTex[2];
 	GLuint bufferDepthTex;
+
+	bool flashlight;
 };

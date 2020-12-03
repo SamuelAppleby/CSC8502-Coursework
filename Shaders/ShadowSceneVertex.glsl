@@ -1,5 +1,5 @@
 #version 330 core
-#define lightSize 12
+#define lightSize 13
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projMatrix;

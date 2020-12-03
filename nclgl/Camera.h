@@ -29,6 +29,8 @@ public:
 	void SetYaw(float y) { yaw = y; }
 	float GetPitch() const { return pitch; }
 	void SetPitch(float p) { pitch = p; }
+	float GetRoll() const { return roll; }
+	void SetRoll(float p) { roll = p; }
 	bool isEnabled() { return enabled; }
 	void setEnabled(bool enabled) { this->enabled = enabled; }
 	void MoveLeft(float dt);
