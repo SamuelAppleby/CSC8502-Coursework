@@ -6,6 +6,8 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	resources = new ResourceManager();
 	heightMap = new HeightMap(TEXTUREDIR "rivermap.png");
 	heightmapSize = heightMap->GetHeightmapSize();
+
+	/* Cameras */
 	resources->cameras.push_back(new Camera(-45.0f, 45, 0.0f, heightmapSize * Vector3(1, 30.0f, 1)));
 	resources->cameras.push_back(new Camera(-90, 0, 0.0f, heightmapSize * Vector3(0.5, 50.0f, 0.5)));
 
@@ -16,11 +18,11 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	resources->sceneShaders.push_back(new Shader("RainVertex.glsl", "RainFragment.glsl"));
 	resources->sceneShaders.push_back(new Shader("TexturedVertex.glsl", "ProcessFragment.glsl"));
 	resources->sceneShaders.push_back(new Shader("TexturedVertex.glsl", "TexturedFragment.glsl"));
-
-	for(auto& shader : resources->sceneShaders)
-		if (!shader->LoadSuccess()) 
-		return;
-
+	for (auto& shader : resources->sceneShaders) {
+		if (!shader->LoadSuccess())
+			return;
+	}
+		
 	/* Meshes */
 	resources->sceneMeshes.push_back(Mesh::LoadFromMeshFile("Sphere.msh"));
 	resources->sceneMeshes.push_back(Mesh::LoadFromMeshFile("Cylinder.msh"));
@@ -34,16 +36,19 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	resources->sceneMeshes.push_back(Mesh::LoadFromMeshFile("Road.msh"));
 	resources->sceneMeshes.push_back(Mesh::LoadFromMeshFile("Lampost.msh"));
 	resources->sceneMeshes.push_back(Mesh::LoadFromMeshFile("car.msh"));
+	for (auto& mesh : resources->sceneMeshes) {
+		if (!mesh)
+			return;
+	}
 
-	/* Materials */
+	/* Mesh Materials */
 	resources->sceneMaterials.push_back(new MeshMaterial("Role_T.mat"));
-	resources->sceneMaterials.push_back(new MeshMaterial("b1.mat"));
-	resources->sceneMaterials.push_back(new MeshMaterial("b2.mat"));
-	resources->sceneMaterials.push_back(new MeshMaterial("portrait_board.mat"));
+	for (auto& material : resources->sceneMaterials) {
+		if (!material)
+			return;
+	}
 
-	/* Animations */
-	resources->sceneAnimations.push_back(new MeshAnimation("Role_T.anm"));
-
+	/* Sub-Mesh materials */
 	vector<GLuint> newMaterials;
 	resources->matTextures.push_back(newMaterials);
 	for (int i = 0; i < resources->sceneMeshes.at(4)->GetSubMeshCount(); ++i) {
@@ -54,6 +59,14 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 		GLuint texID = SOIL_load_OGL_texture(path.c_str(), SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y);
 		resources->matTextures.at(0).emplace_back(texID);
 	}
+
+	/* Animations */
+	resources->sceneAnimations.push_back(new MeshAnimation("Role_T.anm"));
+	for (auto& anim : resources->sceneAnimations) {
+		if (!anim)
+			return;
+	}
+
 	/* Scene Transforms */
 	resources->sceneTransforms.push_back(Matrix4::Translation(heightmapSize * Vector3(0.1, 0, 0.1) + Vector3(0, -2000, 0)) * Matrix4::Scale(Vector3(500, 500, 500)));
 	resources->sceneTransforms.push_back(Matrix4::Translation(heightmapSize * Vector3(-0.4, 0, -0.4) + Vector3(0, -2000, 0)) * Matrix4::Scale(Vector3(500, 500, 500)));
@@ -96,7 +109,6 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	resources->sceneTextures.push_back(SOIL_load_OGL_texture(TEXTUREDIR "cartex.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 	resources->sceneTextures.push_back(SOIL_load_OGL_texture(TEXTUREDIR "carbump.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 	resources->sceneTextures.push_back(SOIL_load_OGL_texture(TEXTUREDIR "advert2tex.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
-
 	int i = 0;
 	for (auto& texture : resources->sceneTextures) {
 		if (!texture)
@@ -107,8 +119,8 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 			SetTextureRepeating(texture, true);
 		++i;
 	}
-	ToggleAnisotropicFiltering(resources->sceneTextures);
-	ToggleTrilinearFiltering(resources->sceneTextures);
+	ToggleAnisotropicFiltering(resources->sceneTextures);		// Default to 4x
+	ToggleTrilinearFiltering(resources->sceneTextures);			// Trilinear on all textures, not bilinear
 
 	cubeMap = SOIL_load_OGL_cubemap(TEXTUREDIR "nx.png", TEXTUREDIR "px.png", TEXTUREDIR "py.png", 
 		TEXTUREDIR "ny.png", TEXTUREDIR "nz.png", TEXTUREDIR "pz.png", SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0);
@@ -161,6 +173,7 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 			break;
 		}
 	}
+
 	/* Shadow buffers and FBOs */
 	for (int i = 0; i < LIGHT_NUM; ++i) {
 		glGenTextures(1, &shadowTex[i]);
@@ -177,9 +190,8 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowTex[i], 0);
 		glDrawBuffer(GL_NONE);
 	}
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE || !shadowTex[0]) {
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE || !shadowTex[0]) 
 		return;
-	}
 	/* Post Processing textures and FBOs */
 	glGenTextures(1, &bufferDepthTex);
 	glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
@@ -203,10 +215,10 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[0], 0);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE || !bufferDepthTex || !bufferColourTex[0]) {
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE || !bufferDepthTex || !bufferColourTex[0])
 		return;
-	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	sceneTime = 0.0f;
@@ -260,7 +272,7 @@ void Renderer::UpdateScene(float dt) {
 			}
 			TraverseScene();
 		}
-		resources->lights.at(0)->SetColour(Vector4(brightness, brightness, brightness, 1));
+		resources->lights.at(0)->SetColour(Vector4(brightness, brightness, brightness, 1));		// Set global directional light
 	}
 }
 void Renderer::TraverseScene() {
@@ -344,6 +356,7 @@ void Renderer::TraverseScene() {
 		dayCycle = true;
 }
 void Renderer::AnimateObjects() {
+	/* Move animated character and vehicle */
 	while (animTime < 0.0f) {
 		currentFrame = (currentFrame + 1) % resources->sceneAnimations.at(0)->GetFrameCount();
 		animTime += 1.0f / resources->sceneAnimations.at(0)->GetFrameRate();
@@ -397,7 +410,7 @@ void Renderer::DayNightCycle() {
 	}
 	else {
 		daySwap = dayTime > 0 ? true : false;
-		restTime = 5.0f;
+		restTime = 5.0f;		// 5 second daylight and night
 	}
 	if (brightness < 0.15)
 		brightness = 0.15;
@@ -424,21 +437,30 @@ void Renderer::RenderScene() {
 		ToggleBilinearFiltering(resources->sceneTextures);
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_2)) 
 		ToggleTrilinearFiltering(resources->sceneTextures);
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_3)) 
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_3))
 		ToggleAnisotropicFiltering(resources->sceneTextures);
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_N)) 
+
+	/* User Controls */
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_N)) {
 		dayCycle = !dayCycle;
+		dayCycle ? std::cout << "Day/Night Cycle On!" << std::endl : std::cout << "Day/Night Cycle Off!" << std::endl;
+	}
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_R)) {
 		resetCam = true;
 		onRails = !onRails;
+		onRails ? std::cout << "Camera Rails On!" << std::endl : std::cout << "Camera Rails Off!" << std::endl;
 	}
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_P)) 
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_P)) {
 		postProcess = !postProcess;
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_F))
+		postProcess ? std::cout << "Post Processing On!"  << std::endl : std::cout <<"Post Processing Off!" << std::endl;
+	}
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_F)) {
 		flashlight = !flashlight;
+		flashlight ? std::cout << "Flashlight On!" << std::endl : std::cout << "Flashlight Off!" << std::endl;
+	}
 }
 void Renderer::DrawSkybox() {
-	if (postProcess) {
+	if (postProcess) {		// Bind our buffers here if post processing operations
 		glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	}
@@ -579,6 +601,7 @@ void Renderer::DrawMainScene(int camera) {
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
 
+	/* Create our array of shadow textures and send array to shader */
 	int arr[LIGHT_NUM] = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 	glUniform1iv(glGetUniformLocation(currentShader->GetProgram(), "shadowTex"), LIGHT_NUM, (GLint*)arr);
 	for (int i = 0; i < LIGHT_NUM; i++) {
@@ -737,7 +760,7 @@ void Renderer::DrawRain() {
 	}
 	rainInit = true;
 	if(postProcess)
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);		// Unbind the depth buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);		// And unbind our depth buffer here
 }
 void Renderer::DrawPostProcess() {
 	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
