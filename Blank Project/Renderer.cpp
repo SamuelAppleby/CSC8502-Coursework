@@ -286,7 +286,6 @@ void Renderer::UpdateScene(float dt) {
 	}
 }
 void Renderer::TraverseScene() {
-	std::cout << resources->cameras.at(0)->GetYaw() << std::endl;
 	/* Camera on rails */
 	if (sceneTime < 30.0f) {
 		if ((int)resources->cameras.at(0)->GetYaw() != 0) {
@@ -479,7 +478,18 @@ void Renderer::RenderScene() {
 			currentEffect = 0;
 		else 
 			currentEffect++;
-		//postProcess ? std::cout << "Post Processing On!"  << std::endl : std::cout <<"Post Processing Off!" << std::endl;
+		switch (currentEffect) {
+		case(0):
+			std::cout << "Post Processing Off!" << std::endl;
+		case(1):
+			std::cout << "Post Processing (Blur) On!" << std::endl;
+		case(2):
+			std::cout << "Post Processing (Bloom) On!" << std::endl;
+		case(3):
+			std::cout << "Post Processing (Colour Grading) On!" << std::endl;
+		case(4):
+			std::cout << "Post Processing (Wave) On!" << std::endl;
+		}
 	}
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_F)) {
 		flashlight = !flashlight;
