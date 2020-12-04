@@ -1,10 +1,16 @@
+/*          Created By Samuel Buzz Appleby
+ *               03/12/2020
+ *                170348069                   
+ * Defining the renderer, most scene objects 
+	are from the ResourceManager instance	 */
 #pragma once
 #include "../nclgl/OGLRenderer.h"
-#include <nclgl\HeightMap.h>
-#include <nclgl\Particle.h>
-#include <nclgl\ResourceManager.h>
-#include <nclgl\MeshAnimation.h>
-#include <nclgl\MeshMaterial.h>
+#include "../nclgl/HeightMap.h"
+#include "../nclgl/Particle.h"
+#include "../nclgl/ResourceManager.h"
+#include "../nclgl/MeshAnimation.h"
+#include "../nclgl/MeshMaterial.h"
+#include "../nclgl/Camera.h"
 const int LIGHT_NUM = 13;
 const int POST_PASSES = 6;
 
@@ -49,14 +55,15 @@ protected:
 	int currentFrame;
 	float animTime;
 
-	unsigned int nr_particles = 3000;
-	vector<Particle> particles;
 	bool rainInit;
+	unsigned int nr_particles;
+	vector<Particle> particles;
 
 	bool onRails;
 	bool turning;
 	bool forward;
-	bool postProcess;
+
+	int currentEffect;
 	GLuint bufferFBO;
 	GLuint processFBO;
 	GLuint bufferColourTex[2];

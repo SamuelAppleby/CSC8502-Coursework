@@ -5,18 +5,18 @@ bool Frustum::InsideFrustum(SceneNode& n) {
 	if (BoundingSphere* sphere = dynamic_cast<BoundingSphere*>(n.getBoundingVolume())) {
 		for (int p = 0; p < 6; ++p) {
 			if (!planes[p].SphereInPlane(n.GetWorldTransform().GetPositionVector(), sphere)) {
-				return false; // scenenode is outside this plane !
+				return false;		// Scene node outside Sphere
 			}
 		}
 	}
 	if (BoundingAABB* AABB = dynamic_cast<BoundingAABB*>(n.getBoundingVolume())) {
 		for (int p = 0; p < 6; ++p) {
 			if (!planes[p].AABBInPlane(n.GetWorldTransform().GetPositionVector(), AABB)) {
-				return false; // scenenode is outside this plane !
+				return false;		// Scene node outside AABB
 			}
 		}
 	}
-	return true; // Scenenode is inside every plane ...
+	return true; 
 }
 void Frustum::FromMatrix(const Matrix4& mat) {
 	Vector3 xaxis = Vector3(mat.values[0], mat.values[4], mat.values[8]);

@@ -1,10 +1,14 @@
+/*          Created By Samuel Buzz Appleby
+ *               03/12/2020
+ *                170348069
+ *			Implementing the renderer			*/
 #include "Renderer.h"
 #include "../nclgl/HeightMap.h"
 #include "../nclgl/Camera.h"
 #include "../nclgl/Light.h"
 #define SHADOWSIZE 2048
 
-Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
+Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	sphere = Mesh::LoadFromMeshFile("Sphere.msh");
 	cone = Mesh::LoadFromMeshFile("Cone.msh");
 	ball = Mesh::LoadFromMeshFile("Sphere.msh");
@@ -12,10 +16,10 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	heightMap = new HeightMap(TEXTUREDIR "noise.png");
 	earthTex = SOIL_load_OGL_texture(TEXTUREDIR"Barren Reds.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
 	earthBump = SOIL_load_OGL_texture(TEXTUREDIR "Barren RedsDOT3.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
-	
+
 	SetTextureRepeating(earthTex, true);
 	SetTextureRepeating(earthBump, true);
-	
+
 	heightmapSize = heightMap->GetHeightmapSize();
 	camera = new Camera(-45.0f, 0.0f, 0.0f, heightmapSize * Vector3(0.5f, 5.0f, 0.5f));
 	lights.reserve(LIGHT_NUM);
@@ -27,7 +31,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 			lights.push_back(new SpotLight(camera->GetPosition(), Vector4(1, 0, 0, 1), Vector3(0.01, -1, 0.01), heightmapSize.x * 0.5f, 15.0f));
 		}
 		if (i == 2) {
-			lights.push_back(new PointLight(heightmapSize * Vector3(0.4f, 5.0f, 0.4f), Vector4(0, 1, 0, 1), heightmapSize.x / 2));
+			lights.push_back(new PointLight(heightmapSize * Vector3(0.4f, 5.0f, 0.4f), Vector4(0, 1, 1, 1), heightmapSize.x / 2));
 		}
 		if (i == 3) {
 			lights.push_back(new PointLight(heightmapSize * Vector3(0.6f, 5.0f, 0.6f), Vector4(0, 0, 1, 1), heightmapSize.x / 2));
@@ -109,15 +113,15 @@ Renderer ::~Renderer(void) {
 void Renderer::GenerateScreenTexture(GLuint& into, bool depth) {
 	glGenTextures(1, &into);
 	glBindTexture(GL_TEXTURE_2D, into);
-	
+
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	
+
 	GLuint format = depth ? GL_DEPTH_COMPONENT24 : GL_RGBA8;
 	GLuint type = depth ? GL_DEPTH_COMPONENT : GL_RGBA;
-	
+
 	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, type, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -166,7 +170,7 @@ void Renderer::DrawShadowScene() {
 void Renderer::FillBuffers() {
 	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	
+
 	BindShader(sceneShader);
 	glUniform1i(glGetUniformLocation(sceneShader->GetProgram(), "diffuseTex"), 0);
 	glActiveTexture(GL_TEXTURE0);
@@ -175,7 +179,7 @@ void Renderer::FillBuffers() {
 	glUniform1i(glGetUniformLocation(sceneShader->GetProgram(), "bumpTex"), 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, earthBump);
-	
+
 	viewMatrix = camera->BuildViewMatrix();
 	projMatrix = Matrix4::Perspective(1.0f, 15000.0f, (float)width / (float)height, 45.0f);
 	modelMatrix.ToIdentity();
@@ -190,24 +194,24 @@ void Renderer::FillBuffers() {
 void Renderer::DrawPointLights() {
 	glBindFramebuffer(GL_FRAMEBUFFER, pointLightFBO);
 	BindShader(pointlightShader);
-	
+
 	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glBlendFunc(GL_ONE, GL_ONE);
 	glCullFace(GL_FRONT);
 	glDepthFunc(GL_ALWAYS);
 	glDepthMask(GL_FALSE);
-	
+
 	glUniform1i(glGetUniformLocation(pointlightShader->GetProgram(), "depthTex"), 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
-	
+
 	glUniform1i(glGetUniformLocation(pointlightShader->GetProgram(), "normTex"), 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, bufferNormalTex);
-	
+
 	glUniform3fv(glGetUniformLocation(pointlightShader->GetProgram(), "cameraPos"), 1, (float*)&camera->GetPosition());
-	
+
 	glUniform2f(glGetUniformLocation(pointlightShader->GetProgram(), "pixelSize"), 1.0f / width, 1.0f / height);
 
 	Matrix4 invViewProj = (projMatrix * viewMatrix).Inverse();
@@ -218,7 +222,7 @@ void Renderer::DrawPointLights() {
 	for (int i = 0; i < LIGHT_NUM; ++i) {
 		SetShaderLight(lights.at(i));
 		glUniformMatrix4fv(glGetUniformLocation(pointlightShader->GetProgram(), "shadowMatrix"), 1, false, shadowMatrices[i].values);
-	
+
 		glUniform1i(glGetUniformLocation(pointlightShader->GetProgram(), "shadowTex"), 2);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, shadowTex[i]);
@@ -242,18 +246,18 @@ void Renderer::CombineBuffers() {
 	viewMatrix.ToIdentity();
 	projMatrix.ToIdentity();
 	UpdateShaderMatrices();
-	
+
 	glUniform1i(glGetUniformLocation(combineShader->GetProgram(), "diffuseTex"), 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, bufferColourTex);
-	
+
 	glUniform1i(glGetUniformLocation(combineShader->GetProgram(), "diffuseLight"), 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, lightDiffuseTex);
-	
+
 	glUniform1i(glGetUniformLocation(combineShader->GetProgram(), "specularLight"), 2);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, lightSpecularTex);
-	
+
 	quad->Draw();
 }

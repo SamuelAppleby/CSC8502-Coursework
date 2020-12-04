@@ -1,3 +1,8 @@
+/*          Created By Samuel Buzz Appleby
+ *               03/12/2020
+ *                170348069
+ * Class demonstrating multiple light and shadow mapping
+				with deferred rendering				*/
 #pragma once
 #include "../nclgl/OGLRenderer.h"
 class Camera;
@@ -7,7 +12,7 @@ const int LIGHT_NUM = 4;
 
 class Renderer : public OGLRenderer {
 public:
-	Renderer(Window & parent);
+	Renderer(Window& parent);
 	~Renderer(void);
 	void RenderScene() override;
 	void UpdateScene(float dt) override;
@@ -17,13 +22,13 @@ protected:
 	void DrawPointLights(); // Lighting Render Pass
 	void CombineBuffers(); // Combination Render Pass
 	// Make a new texture ...
-	void GenerateScreenTexture(GLuint & into, bool depth = false);
-	
+	void GenerateScreenTexture(GLuint& into, bool depth = false);
+
 	Shader* sceneShader; // Shader to fill our GBuffers
 	Shader* shadowShader;
 	Shader* pointlightShader; // Shader to calculate lighting
 	Shader* combineShader; // shader to stick it all together
-	
+
 	GLuint shadowFBO[LIGHT_NUM];
 	GLuint shadowTex[LIGHT_NUM];
 	Matrix4 shadowMatrices[LIGHT_NUM];

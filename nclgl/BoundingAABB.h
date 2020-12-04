@@ -1,3 +1,7 @@
+/*          Created By Samuel Buzz Appleby
+ *               03/12/2020
+ *                170348069
+ *			Bounding AABB class			*/
 #pragma once
 #include"BoundingVolume.h"
 class BoundingAABB : public BoundingVolume {

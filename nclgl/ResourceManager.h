@@ -1,3 +1,7 @@
+/*          Created By Samuel Buzz Appleby
+ *               03/12/2020
+ *                170348069
+ *			Resource manager class				*/
 #pragma once
 #include "OGLRenderer.h"
 #include "MeshAnimation.h"

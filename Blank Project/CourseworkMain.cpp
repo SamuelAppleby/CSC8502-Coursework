@@ -1,8 +1,12 @@
-#include "../nclgl/window.h"
+/*          Created By Samuel Buzz Appleby
+ *               03/12/2020
+ *                170348069                  
+ *	Main function, create window and renderer	 */
 #include "Renderer.h"
+#include "../nclgl/Window.h"
 
 int main() {
-	Window w("CyberPunk", 1280, 720, false); 
+	Window w("CyberPunk", 1920, 1080, true); 
 	if (!w.HasInitialised()) 
 		return -1;
 	Renderer renderer(w); 

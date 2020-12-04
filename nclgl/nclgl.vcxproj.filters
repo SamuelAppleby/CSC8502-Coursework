@@ -38,8 +38,6 @@
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="HeightMap.cpp" />
-    <ClCompile Include="Particle.cpp" />
-    <ClCompile Include="ResourceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />

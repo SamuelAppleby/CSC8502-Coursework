@@ -1,15 +1,18 @@
+/*          Created By Samuel Buzz Appleby
+ *               03/12/2020
+ *                170348069
+ *	Imlementation of scene graph using new AABB calculations  */
 #include "Renderer.h"
 #include "../nclgl/CubeRobot.h"
-#include <algorithm> // For std :: sort ...
+#include <algorithm> 
 Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	camera = new Camera(0.0f, 0.0f, 0.0f, Vector3(0, 100, 750.0f));
 	quad = Mesh::GenerateQuad();
 	cube = Mesh::LoadFromMeshFile("OffsetCubeY.msh");
 	shader = new Shader("SceneVertex.glsl", "SceneFragment.glsl");
 	texture = SOIL_load_OGL_texture(TEXTUREDIR "stainedglass.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0);
-	if (!shader->LoadSuccess() || !texture) {
+	if (!shader->LoadSuccess() || !texture) 
 		return;
-	}
 	root = new SceneNode();
 	for (int i = 0; i < 5; ++i) {
 		SceneNode* s = new SceneNode();
@@ -45,34 +48,28 @@ void Renderer::UpdateScene(float dt) {
 	root->Update(dt);
 }
 void Renderer::BuildNodeLists(SceneNode* from) {
-	if (frameFrustum.InsideFrustum(*from)) {
+	if (frameFrustum.InsideFrustum(*from)) {		// Conatins checks for AABB Frustum and Sphere Frustum
 		Vector3 dir = from->GetWorldTransform().GetPositionVector() - camera->GetPosition();
 		from->SetCameraDistance(Vector3::Dot(dir, dir));
-		if (from->GetColour().w < 1.0f) {
+		if (from->GetColour().w < 1.0f) 
 			transparentNodeList.push_back(from);
-		}
-		else {
+		else 
 			nodeList.push_back(from);
-		}
 	}
-	else if (!from->considerChilren()) {
+	else if (!from->considerChilren()) 
 		return;		// If a parent encompasses its children and fails the frustum
-	}
-	for (auto& i : from->getChildren()) {
+	for (auto& i : from->getChildren()) 
 		BuildNodeLists(i);
-	}
 }
 void Renderer::SortNodeLists() {
 	std::sort(transparentNodeList.rbegin(), transparentNodeList.rend(), SceneNode::CompareByCameraDistance);
 	std::sort(nodeList.begin(), nodeList.end(), SceneNode::CompareByCameraDistance);
 }
 void Renderer::DrawNodes() {
-	for (const auto& i : nodeList) {
+	for (const auto& i : nodeList) 
 		DrawNode(i);
-	}
-	for (const auto& i : transparentNodeList) {
+	for (const auto& i : transparentNodeList) 
 		DrawNode(i);
-	}
 }
 void Renderer::DrawNode(SceneNode* n) {
 	if (n->GetMesh()) {

@@ -1,3 +1,7 @@
+/*          Created By Samuel Buzz Appleby
+ *               03/12/2020
+ *                170348069
+ *				Light base class					*/
 #pragma once
 #include "Vector4.h"
 #include "Vector3.h"
